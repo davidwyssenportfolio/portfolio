@@ -235,10 +235,19 @@ ul, ol { padding-left: 1.2em; }
   margin-top: 197px;                         /* reservierter Raum Header -> Grid */
 }
 .home-gallery-row  { display: flex; flex-direction: column; gap: var(--grid-gutter); }
-.home-gallery-item { flex: 1 1 0; aspect-ratio: 16 / 9; overflow: hidden; }
+.home-gallery-item {
+  /* In der Spaltenrichtung darf KEIN flex-basis 0 gesetzt sein — sonst
+     kollabiert die Höhe auf 0 und aspect-ratio greift nicht mehr.
+     Gleiche Breiten gibt es erst ab 1280, wenn die Reihe horizontal wird. */
+  flex: 0 0 auto; width: 100%;
+  aspect-ratio: 16 / 9; overflow: hidden;
+}
 .home-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
 
-@media (min-width: 1280px) { .home-gallery-row { flex-direction: row; } }
+@media (min-width: 1280px) {
+  .home-gallery-row  { flex-direction: row; }
+  .home-gallery-item { flex: 1 1 0; width: auto; }
+}
 @media (max-width: 991px)  { .home-gallery { margin-top: 286px; } }
 @media (max-width: 767px)  { .home-gallery { margin-top: 317px; } }
 
