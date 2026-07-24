@@ -159,37 +159,54 @@ const raster = [
         </p>
       </section>
 
-      {/* ── Live-Messung am echten Content ────────────────────── */}
+      {/* ── Live-Messung: Soll gegen Ist ───────────────────────── */}
       <section class="sg-block">
-        <h2 class="text-heading-lg">Gemessen am gerenderten Content</h2>
+        <h2 class="text-heading-lg">Abstände — Soll gegen Ist</h2>
         <p class="text-caption sg-note">
-          Gemessene Abstände aus einem echten Content-Block. Weicht ein Wert vom
-          Soll oben ab, stimmt etwas im CSS nicht.
+          Jede Zeile wird an echtem, gerendertem Markup gemessen. Steht rechts ein
+          Haken, entspricht der ausgelieferte Abstand exakt dem definierten Wert.
+          Weicht etwas ab, steht die Differenz da — dann stimmt eine Regel im CSS nicht.
         </p>
+
+        {/* Messproben: unsichtbar, aber echt gerendert */}
         <div class="sg-probe" aria-hidden="true">
-          <div class="section">
-            <div class="section-content" id="sg-probe-content">
-              <header class="section-header">
-                <p class="text-overline">Overline</p>
-                <h2 class="text-heading-lg">Überschrift</h2>
-                <p class="text-body-lg">Lead-Absatz im Section Header.</p>
-              </header>
-              <p>Fortlaufender Absatz.</p>
-              <p>Zweiter fortlaufender Absatz.</p>
-              <h3>Neues Topic</h3>
-              <p>Absatz im H3-Block.</p>
-              <div class="body-block">
-                <p class="text-body-title">Body Title</p>
-                <p>Body im Body Block.</p>
-              </div>
-            </div>
-          </div>
+          <div class="section"><div class="section-content" data-probe="a">
+            <header class="section-header">
+              <p class="text-overline">Overline</p>
+              <h2 class="text-heading-lg">H2</h2>
+              <p class="text-body-lg">Lead</p>
+            </header>
+            <p>Absatz eins</p>
+            <p>Absatz zwei</p>
+            <h3>H3</h3>
+            <p>Text im H3-Block</p>
+            <div class="body-block"><p class="text-body-title">Body Title</p><p>Body</p></div>
+            <h3>H3 zwei</h3>
+            <div class="body-block"><p class="text-body-title">Title</p><p>Body</p></div>
+            <div class="list-block"><p class="text-body-title">Listentitel</p><ul><li>Punkt</li><li>Punkt</li></ul></div>
+          </div></div>
+          <div class="section"><div class="section-content" data-probe="b">
+            <header class="section-header"><p class="text-overline">O</p><h2 class="text-heading-lg">H2</h2></header>
+            <h3>H3 direkt nach Section Header</h3>
+            <p>Text</p>
+            <div class="list-block"><p class="text-body-title">Liste</p><ul><li>x</li></ul></div>
+          </div></div>
+          <div class="section"><div class="meta-rail" data-probe="meta">
+            <div class="meta-row"><span class="text-meta-label">Label</span><span class="text-meta-value">Wert</span></div>
+            <div class="meta-row"><span class="text-meta-label">Label</span><span class="text-meta-value">Wert</span></div>
+          </div></div>
+          <figure class="image-card" data-probe="card">
+            <div style="height:40px;background:var(--primary-100)"></div>
+            <figcaption class="text-caption">Bildlegende</figcaption>
+          </figure>
         </div>
-        <div class="sg-table" id="sg-measured">
-          <div class="sg-row sg-row--3 sg-row--head">
-            <span class="text-meta-label">Von</span>
-            <span class="text-meta-label">Zu</span>
-            <span class="text-meta-label">Gemessen</span>
+
+        <div class="sg-table" id="sg-messung">
+          <div class="sg-row sg-row--mess sg-row--head">
+            <span class="text-meta-label">Beziehung</span>
+            <span class="text-meta-label">Soll</span>
+            <span class="text-meta-label">Ist</span>
+            <span class="text-meta-label">Status</span>
           </div>
         </div>
       </section>
@@ -280,6 +297,9 @@ const raster = [
   .sg-row--3     { grid-template-columns: 1.2fr 2fr 1fr; }
   .sg-row--color { grid-template-columns: 24px 1.2fr 1fr 2fr; align-items: center; }
   .sg-row--grid  { grid-template-columns: 0.8fr 1fr 1.4fr 1.4fr 0.6fr; }
+  .sg-row--mess  { grid-template-columns: 2.4fr 0.5fr 0.5fr 0.8fr; }
+  .sg-row--abweichung { background: var(--primary-050); }
+  .sg-row--abweichung p:last-child { color: var(--text-primary); font-weight: 500; }
   .sg-row--head  { border-top: none; padding-bottom: var(--spacing-008); }
   .sg-specimen   { min-width: 0; overflow: hidden; }
   .sg-swatch     { display: block; width: 24px; height: 24px; border: 1px solid var(--primary-100); }
@@ -324,29 +344,70 @@ const raster = [
       row.querySelector('[data-field=color]').textContent = rgbToHex(c.color);
     });
 
-    // Abstände am echten Content messen
-    var probe = document.getElementById('sg-probe-content');
-    var target = document.getElementById('sg-measured');
-    if (probe && target) {
-      var label = function (el) {
-        if (el.classList.contains('section-header')) return 'Section Header';
-        if (el.classList.contains('body-block')) return 'Body Block';
-        if (el.tagName === 'H3') return 'H3';
-        if (el.tagName === 'P') return 'Absatz';
-        return el.tagName.toLowerCase();
+    // Soll gegen Ist messen
+    var tabelle = document.getElementById('sg-messung');
+    if (tabelle) {
+      var A = document.querySelector('[data-probe=a]');
+      var B = document.querySelector('[data-probe=b]');
+      var kids = function (el) { return Array.prototype.slice.call(el.children); };
+      var abstand = function (a, b) {
+        var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        return Math.round(rb.top - ra.bottom);
       };
-      var kids = Array.prototype.slice.call(probe.children);
-      for (var i = 1; i < kids.length; i++) {
-        var a = kids[i - 1].getBoundingClientRect();
-        var b = kids[i].getBoundingClientRect();
-        var row = document.createElement('div');
-        row.className = 'sg-row sg-row--3';
-        row.innerHTML =
-          '<p class="text-meta-value">' + label(kids[i - 1]) + '</p>' +
-          '<p class="text-caption">' + label(kids[i]) + '</p>' +
-          '<p class="text-meta-value">' + Math.round(b.top - a.bottom) + ' px</p>';
-        target.appendChild(row);
+      var innen = function (el) {
+        var c = kids(el);
+        return c.length > 1 ? abstand(c[0], c[1]) : null;
+      };
+
+      var a = kids(A), b = kids(B);
+      var pruefungen = [
+        ['Section Header — intern (Overline · H2 · Lead)', 12, innen(a[0])],
+        ['Section Header → Absatz', 16, abstand(a[0], a[1])],
+        ['Absatz → Absatz (fortlaufend)', 16, abstand(a[1], a[2])],
+        ['Absatz → H3 (neues Topic)', 24, abstand(a[2], a[3])],
+        ['H3 → Text (H3-Block intern)', 12, abstand(a[3], a[4])],
+        ['Text → Body Block', 16, abstand(a[4], a[5])],
+        ['Body Block — intern (Title · Body)', 0, innen(a[5])],
+        ['Body Block → H3', 24, abstand(a[5], a[6])],
+        ['H3 → Body Block (im H3-Block)', 12, abstand(a[6], a[7])],
+        ['Body Block → List Block', 24, abstand(a[7], a[8])],
+        ['List Block — intern (Titel · Liste)', 12, innen(a[8])],
+        ['Section Header → H3', 24, abstand(b[0], b[1])],
+        ['H3 → Text', 12, abstand(b[1], b[2])],
+        ['Text → List Block', 24, abstand(b[2], b[3])]
+      ];
+
+      var meta = document.querySelector('[data-probe=meta]');
+      if (meta && meta.children.length > 1) {
+        var mk = kids(meta);
+        // Die Meta Rail wechselt die Richtung: ab 1280 vertikal mit rail-item-gap,
+        // darunter horizontal mit dem Gutter. Entsprechend wird gemessen.
+        var senkrecht = getComputedStyle(meta).flexDirection === 'column';
+        var gutter = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-gutter')) || 32;
+        var r0 = mk[0].getBoundingClientRect(), r1 = mk[1].getBoundingClientRect();
+        pruefungen.push([
+          senkrecht ? 'Meta Rail — vertikal (rail-item-gap)' : 'Meta Rail — horizontal (grid-gutter)',
+          senkrecht ? 12 : gutter,
+          Math.round(senkrecht ? r1.top - r0.bottom : r1.left - r0.right)
+        ]);
+        pruefungen.push(['Meta Row — intern (Label · Wert)', 0, innen(mk[0])]);
       }
+      var card = document.querySelector('[data-probe=card]');
+      if (card) pruefungen.push(['Image Card — Bild → Bildlegende', 16, innen(card)]);
+
+      pruefungen.forEach(function (z) {
+        var name = z[0], soll = z[1], ist = z[2];
+        var ok = ist === soll;
+        var diff = ist === null ? '—' : (ok ? 'exakt' : (ist > soll ? '+' : '') + (ist - soll) + ' px');
+        var row = document.createElement('div');
+        row.className = 'sg-row sg-row--mess' + (ok ? '' : ' sg-row--abweichung');
+        row.innerHTML =
+          '<p class="text-meta-value">' + name + '</p>' +
+          '<p class="text-meta-value">' + soll + ' px</p>' +
+          '<p class="text-meta-value">' + (ist === null ? '—' : ist + ' px') + '</p>' +
+          '<p class="text-caption">' + diff + '</p>';
+        tabelle.appendChild(row);
+      });
     }
 
     // Fensterbreite anzeigen
