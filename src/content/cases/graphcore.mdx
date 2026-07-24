@@ -1,0 +1,121 @@
+---
+# 1:1-Umsetzung des Figma-Boards "1440 Code" (Seite "Design 2", Node 237:1085).
+# Alle Texte verbatim aus Figma übernommen — inklusive der Präfixe wie "H2." und
+# "Body.", die dort als Stil-Marker stehen. Kein Overline im Hero: das Title Block
+# im Board enthält nur H1 und Subtitle.
+title: H1.Graphore
+subtitle: Brand Identity, Digital Design
+intro: Visual identity, dynamic typeface and pattern generator for a machine learning hardware start-up. 3 Zeile zum anschauen.
+heroImage: img/gc-hero.svg
+heroAlt: ""
+cover: img/gc-cover.svg
+coverAlt: Graphcore
+order: 0
+meta:
+  - { label: Rubrik, value: Ergebniss }
+  - { label: Rubrik, value: Ergebniss }
+  - { label: Rubrik, value: Ergebniss }
+  - { label: Rubrik, value: Ergebniss }
+anchors:
+  - { label: "Nav2. normal", href: "#section-1" }
+  - { label: "Nav2. Active", href: "#section-2" }
+  - { label: "Nav2. hover", href: "#section-3" }
+  - { label: "Nav2. normal", href: "#section-1" }
+---
+
+{/* ── Section 1 — mit Meta Rail und Nav2 ───────────────────────────── */}
+
+<Section id="section-1" first meta={frontmatter.meta} anchors={frontmatter.anchors}>
+  <SectionHeader
+    overline="Overline. Lorem ipsum dolores"
+    title="H2. Visual identity, dynamic typeface."
+    lead="Based in Bristol (UK) and Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects."
+  />
+
+  ### H3. Based in Bristol (UK)
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+
+  ### H3. Based in Bristol (UK)
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+
+  <BodyBlock title="Bodytitle. Based in Bristol (UK)">
+    Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+  </BodyBlock>
+
+  {/* Im Board sitzt dieses Body Block INNERHALB des H3 Blocks — daher 12px
+      Abstand zur Überschrift, nicht 16px. Regel dafür steht in global.css. */}
+  ### H3. Based in Bristol (UK)
+
+  <BodyBlock title="Bodytitle. Based in Bristol (UK)">
+    Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+  </BodyBlock>
+</Section>
+
+{/* ── Section 2 ─────────────────────────────────────────────────────── */}
+
+<Section id="section-2">
+  <SectionHeader
+    overline="Overline. Lorem ipsum dolores"
+    title="H2. Visual identity, dynamic typeface."
+  />
+
+  ### H3. Based in Bristol (UK)
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+</Section>
+
+{/* ── Section 3 ─────────────────────────────────────────────────────── */}
+
+<Section id="section-3">
+  <SectionHeader
+    overline="Overline. Lorem ipsum dolores"
+    title="H2. Visual identity, dynamic typeface."
+  />
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+
+  Body. And Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where machine learning improves all aspects of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU) that accelerates machine learning and gives experts in the field a platform that's efficient, flexible and dynamic. This piece of hardware will not only empower existing start-ups, universities and research labs but will effectively shift and shape future sectors and industries.
+
+  <ListBlock title="ListTitle. Based in Bristol (UK)">
+    - List. And Palo Alto (US), Graphcore is a technology start-up
+    - With the ambitious mission of creating a future where machine learning improves all aspects
+    - Of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU)
+    - That accelerates machine learning and gives experts in the field a platform that's efficient
+    - Flexible and dynamic. This piece of hardware will not only empower existing start-ups,
+    - Universities and research labs but will effectively shift and shape future sectors and industries.
+  </ListBlock>
+
+  <ListBlock title="ListTitle. Based in Bristol (UK)">
+    - List. And Palo Alto (US), Graphcore is a technology start-up
+    - With the ambitious mission of creating a future where machine learning improves all aspects
+    - Of our everyday lives. They've developed a one of a kind Intelligent Processing Unit (IPU)
+    - That accelerates machine learning and gives experts in the field a platform that's efficient
+    - Flexible and dynamic. This piece of hardware will not only empower existing start-ups,
+    - Universities and research labs but will effectively shift and shape future sectors and industries.
+  </ListBlock>
+</Section>
+
+{/* ── Images ────────────────────────────────────────────────────────────
+     Im Board liegen ALLE Bildblöcke gesammelt nach den Sections, nicht
+     dazwischen. Reihenfolge und Masse 1:1 übernommen.                    */}
+
+<ImageRow card>
+  <ImageCard src="img/gc-01.svg" alt="" caption="Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where." />
+</ImageRow>
+
+<ImageRow card>
+  <ImageCard src="img/gc-02.svg" alt="" caption="Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where." />
+</ImageRow>
+
+<ImageCard src="img/gc-03.svg" alt="" caption="Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a technology start-up with the ambitious mission of creating a future where." />
+
+<ImageRowHalf>
+  <ImageCard src="img/gc-04.svg" alt="" />
+  <ImageCard src="img/gc-05.svg" alt="" />
+</ImageRowHalf>
+
+<ImageCard src="img/gc-06.svg" alt="" />

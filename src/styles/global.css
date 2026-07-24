@@ -115,13 +115,15 @@ ul, ol { padding-left: 1.2em; }
 .section-content > * + .list-block,
 .section-content > * + .section-header { margin-top: var(--spacing-024); }
 .section-content h3 + p { margin-top: var(--spacing-012); } /* H3-Block intern */
+.section-content h3 + .body-block { margin-top: var(--spacing-012); } /* Body Block im H3-Block */
 
 /* Markdown-Elemente im Content erben die Textstile */
 .section-content p  { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
 .section-content h3 { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
 .section-content ul,
 .section-content ol { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
-.section-content li + li { margin-top: var(--spacing-008); }
+/* Listenpunkte ohne Zusatzabstand — das Design System definiert nur den
+   Abstand Titel→Liste (12). Ein Item-Gap wäre eine Erfindung. */
 
 /* --- Blöcke --- */
 .section-header { display: flex; flex-direction: column; row-gap: var(--spacing-012); }
