@@ -1,0 +1,221 @@
+title: H1.Graphore
+subtitle: Brand Identity, Digital Design
+intro: >-
+  Visual identity, dynamic typeface and pattern generator for a machine learning
+  hardware start-up. 3 Zeile zum anschauen.
+heroImage: img/gc-hero.svg
+heroAlt: ''
+cover: img/gc-cover.svg
+coverAlt: Graphcore
+order: 0
+draft: false
+meta:
+  - label: Rubrik
+    value: Ergebniss
+  - label: Rubrik
+    value: Ergebniss
+  - label: Rubrik
+    value: Ergebniss
+  - label: Rubrik
+    value: Ergebniss
+anchors:
+  - label: Nav2. normal
+    href: '#section-1'
+  - label: Nav2. Active
+    href: '#section-2'
+  - label: Nav2. hover
+    href: '#section-3'
+  - label: Nav2. normal
+    href: '#section-1'
+blocks:
+  - discriminant: newSection
+    value:
+      anchor: section-1
+  - discriminant: sectionHeader
+    value:
+      overline: Overline. Lorem ipsum dolores
+      title: H2. Visual identity, dynamic typeface.
+      lead: >-
+        Based in Bristol (UK) and Palo Alto (US), Graphcore is a technology
+        start-up with the ambitious mission of creating a future where machine
+        learning improves all aspects.
+  - discriminant: h3
+    value:
+      title: H3. Based in Bristol (UK)
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: paragraph
+    value:
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: h3
+    value:
+      title: H3. Based in Bristol (UK)
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: bodyBlock
+    value:
+      title: Bodytitle. Based in Bristol (UK)
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: h3
+    value:
+      title: H3. Based in Bristol (UK)
+  - discriminant: bodyBlock
+    value:
+      title: Bodytitle. Based in Bristol (UK)
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: newSection
+    value:
+      anchor: section-2
+  - discriminant: sectionHeader
+    value:
+      overline: Overline. Lorem ipsum dolores
+      title: H2. Visual identity, dynamic typeface.
+  - discriminant: h3
+    value:
+      title: H3. Based in Bristol (UK)
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: newSection
+    value:
+      anchor: section-3
+  - discriminant: sectionHeader
+    value:
+      overline: Overline. Lorem ipsum dolores
+      title: H2. Visual identity, dynamic typeface.
+  - discriminant: paragraph
+    value:
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: paragraph
+    value:
+      text: >-
+        Body. And Palo Alto (US), Graphcore is a technology start-up with the
+        ambitious mission of creating a future where machine learning improves
+        all aspects of our everyday lives. They’ve developed a one of a kind
+        Intelligent Processing Unit (IPU) that accelerates machine learning and
+        gives experts in the field a platform that’s efficient, flexible and
+        dynamic. This piece of hardware will not only empower existing
+        start-ups, universities and research labs but will effectively shift and
+        shape future sectors and industries.
+  - discriminant: listBlock
+    value:
+      title: ListTitle. Based in Bristol (UK)
+      items:
+        - List. And Palo Alto (US), Graphcore is a technology start-up
+        - >-
+          With the ambitious mission of creating a future where machine learning
+          improves all aspects
+        - >-
+          Of our everyday lives. They’ve developed a one of a kind Intelligent
+          Processing Unit (IPU)
+        - >-
+          That accelerates machine learning and gives experts in the field a
+          platform that’s efficient
+        - >-
+          Flexible and dynamic. This piece of hardware will not only empower
+          existing start-ups,
+        - >-
+          Universities and research labs but will effectively shift and shape
+          future sectors and industries.
+  - discriminant: listBlock
+    value:
+      title: ListTitle. Based in Bristol (UK)
+      items:
+        - List. And Palo Alto (US), Graphcore is a technology start-up
+        - >-
+          With the ambitious mission of creating a future where machine learning
+          improves all aspects
+        - >-
+          Of our everyday lives. They’ve developed a one of a kind Intelligent
+          Processing Unit (IPU)
+        - >-
+          That accelerates machine learning and gives experts in the field a
+          platform that’s efficient
+        - >-
+          Flexible and dynamic. This piece of hardware will not only empower
+          existing start-ups,
+        - >-
+          Universities and research labs but will effectively shift and shape
+          future sectors and industries.
+  - discriminant: imageColumn
+    value:
+      src: img/gc-01.svg
+      caption: >-
+        Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
+        technology start-up with the ambitious mission of creating a future
+        where.
+  - discriminant: imageColumn
+    value:
+      src: img/gc-02.svg
+      caption: >-
+        Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
+        technology start-up with the ambitious mission of creating a future
+        where.
+  - discriminant: imageFull
+    value:
+      src: img/gc-03.svg
+      caption: >-
+        Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
+        technology start-up with the ambitious mission of creating a future
+        where.
+  - discriminant: imagePair
+    value:
+      left:
+        src: img/gc-04.svg
+      right:
+        src: img/gc-05.svg
+  - discriminant: imageFull
+    value:
+      src: img/gc-06.svg

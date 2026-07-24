@@ -1,0 +1,81 @@
+# Reines Beispiel — zeigt Bilder ZWISCHEN thematischen Sections.
+# Blockform { discriminant, value } = Keystatic fields.conditional.
+title: Pilot Case Study
+overline: Digital Product
+subtitle: Design System & Responsive Build
+intro: "Platzhalter-Intro für den Pilot-Case. Zwei bis drei Sätze, die das Projekt einordnen — Aufgabe, Kontext, Ergebnis. Der Text füllt die zweite Hero-Spalte und beginnt mit dem 4px-Offset auf Höhe des Titels."
+heroImage: img/hero-pilot.svg
+heroAlt: Hero-Platzhalter
+cover: img/cover-pilot.svg
+coverAlt: Cover Pilot Case
+order: 1
+draft: false
+meta:
+  - { label: Jahr, value: "2026" }
+  - { label: Rolle, value: UX/UI Design }
+  - { label: Leistung, value: Design System }
+  - { label: Umsetzung, value: Astro }
+anchors:
+  - { label: Überblick, href: "#ueberblick" }
+  - { label: Prozess, href: "#prozess" }
+  - { label: Ergebnis, href: "#ergebnis" }
+
+blocks:
+  # ── Überblick — mit Meta Rail und Nav2 ────────────────────────────
+  - discriminant: newSection
+    value: { anchor: ueberblick }
+  - discriminant: sectionHeader
+    value:
+      overline: "01"
+      title: "Überblick"
+      lead: "Lead-Absatz direkt im Section Header — gap 12 zum H2, danach greift der Content-Rhythmus."
+  - discriminant: paragraph
+    value: { text: "Ein Continuation-Absatz: 16px Abstand zum Block darüber, weil er inhaltlich dazugehört." }
+  - discriminant: paragraph
+    value: { text: "Noch ein Absatz — wieder 16px. Der Rhythmus entsteht automatisch aus der Nachbarschaft, ohne Wrapper." }
+  - discriminant: h3
+    value:
+      title: "Ein neues Topic"
+      text: "Vor dem H3 stehen 24px, danach 12px — der H3-Block aus Figma, hier rein über CSS-Nachbarschaft abgebildet."
+  - discriminant: bodyBlock
+    value:
+      title: "Body Title"
+      text: "Der Body-Block: Titel und Text ohne Abstand (gap 0), als eigener Block mit 16px Anschluss nach oben."
+  - discriminant: listBlock
+    value:
+      title: "Leistungen"
+      items:
+        - "Research & Konzept"
+        - "Design System"
+        - "Responsive Build"
+
+  # Bild volle Breite zwischen zwei Sections (schliesst Überblick, .content-Ebene).
+  - discriminant: imageFull
+    value: { src: img/full-01.svg, alt: "", caption: "Volle Content-Breite — Bildblöcke sind Geschwister der Sections, nicht Teil der Textspalte." }
+
+  # ── Prozess ───────────────────────────────────────────────────────
+  - discriminant: newSection
+    value: { anchor: prozess }
+  - discriminant: sectionHeader
+    value: { overline: "02", title: "Prozess", lead: "" }
+  - discriminant: paragraph
+    value: { text: "Sections ohne Rails sind einfache 5-Spalten-Grids — der Text sitzt ab 1280 auf drei, bei 992 auf vier Spalten, darunter volle Breite." }
+  - discriminant: h3
+    value:
+      title: "Vom Board zum Code"
+      text: "Zwischen zwei Sections liegen 40px, zwischen Section und Bildblock 32px — beides über den Content-Fluss geregelt."
+
+  - discriminant: imageColumn
+    value: { src: img/card-01.svg, alt: "", caption: "Karte auf der Textspalte — folgt dem 3/4-Spalten-Mass des Contents." }
+  - discriminant: imagePair
+    value:
+      left:  { src: img/half-01.svg, alt: "", caption: "Zwei nebeneinander." }
+      right: { src: img/half-02.svg, alt: "", caption: "Die Zeile kollabiert an keinem Breakpoint — auch bei 480 bleiben es zwei Spalten." }
+
+  # ── Ergebnis ──────────────────────────────────────────────────────
+  - discriminant: newSection
+    value: { anchor: ergebnis }
+  - discriminant: sectionHeader
+    value: { overline: "03", title: "Ergebnis", lead: "" }
+  - discriminant: paragraph
+    value: { text: "Abschluss-Section. Danach folgen 160px Weissraum und der dunkle Footer — beides Teil der fixen Shell." }

@@ -1,0 +1,33 @@
+---
+// Rendert EINEN Textblock als direkte Kinder von .section-content.
+// Der Content-Rhythmus (12/16/24) lebt ausschliesslich in global.css über
+// Nachbarschaftsselektoren — hier wird bewusst KEIN Abstand gesetzt und KEIN
+// zusätzliches Wrapper-Element erzeugt, sonst greifen die Sibling-Selektoren
+// nicht mehr. h3 und Absatz sind klassenlos (erben Textstil aus global.css).
+import SectionHeader from './SectionHeader.astro';
+import BodyBlock from './BodyBlock.astro';
+import ListBlock from './ListBlock.astro';
+const { block: b } = Astro.props;
+---
+{b.type === 'sectionHeader' && (
+  <SectionHeader overline={b.overline} title={b.title} lead={b.lead} />
+)}
+
+{b.type === 'paragraph' && <p>{b.text}</p>}
+
+{b.type === 'h3' && (
+  <Fragment>
+    <h3>{b.title}</h3>
+    {b.text && <p>{b.text}</p>}
+  </Fragment>
+)}
+
+{b.type === 'bodyBlock' && (
+  <BodyBlock title={b.title}><p>{b.text}</p></BodyBlock>
+)}
+
+{b.type === 'listBlock' && (
+  <ListBlock title={b.title}>
+    <ul>{b.items.map((item) => <li>{item}</li>)}</ul>
+  </ListBlock>
+)}

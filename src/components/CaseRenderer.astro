@@ -1,0 +1,63 @@
+---
+// Baut aus der flachen Blockliste die bekannte .content-Struktur:
+//   Textblöcke werden in <Section> gruppiert, Bildblöcke stehen als
+//   Geschwister direkt auf .content-Ebene.
+//
+// Section-Logik (siehe keystatic-auftrag.md, Vorgabe B):
+//   - `newSection` schliesst die laufende Section und merkt sich die Anker-ID
+//     für die naechste zu oeffnende Section (thematischer Start).
+//   - Ein Bildblock schliesst die laufende Section und wird auf .content
+//     ausgegeben. Die Folge-Textblöcke oeffnen automatisch eine neue Section
+//     OHNE Anker (Fortsetzung), damit der Text wieder im 5-Spalten-Grid sitzt.
+//   - Sections werden LAZY geoeffnet (erst beim naechsten Textblock), damit
+//     aufeinanderfolgende Bilder keine leeren <section>-Elemente erzeugen.
+//   - Anker-ID nur an der ERSTEN Section einer thematischen Section.
+//   - Meta Rail + Nav2 nur an der allerersten Section der Seite.
+import Section from './Section.astro';
+import BlockContent from './BlockContent.astro';
+import ImageCard from './ImageCard.astro';
+import ImageRow from './ImageRow.astro';
+import ImageRowHalf from './ImageRowHalf.astro';
+
+const { blocks = [], meta = [], anchors = [] } = Astro.props;
+const isImage = (t) => t === 'imageFull' || t === 'imageColumn' || t === 'imagePair';
+
+// Keystatic-Form { discriminant, value } -> flaches { type, ...value }.
+const items = blocks.map((b) => ({ type: b.discriminant, ...b.value }));
+
+const groups = [];
+let current = null;          // { id, rails, blocks: [] }
+let pendingAnchor = undefined;
+let firstSectionOpened = false;
+const flush = () => { if (current) { groups.push({ kind: 'section', ...current }); current = null; } };
+
+for (const b of items) {
+  if (b.type === 'newSection') { flush(); pendingAnchor = b.anchor || undefined; continue; }
+  if (isImage(b.type)) { flush(); groups.push({ kind: 'image', block: b }); continue; }
+  if (!current) {
+    current = { id: pendingAnchor, rails: !firstSectionOpened, blocks: [] };
+    pendingAnchor = undefined;
+    firstSectionOpened = true;
+  }
+  current.blocks.push(b);
+}
+flush();
+---
+{groups.map((g) => g.kind === 'image' ? (
+  g.block.type === 'imageFull' ? (
+    <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} />
+  ) : g.block.type === 'imageColumn' ? (
+    <ImageRow card>
+      <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} />
+    </ImageRow>
+  ) : (
+    <ImageRowHalf>
+      <ImageCard src={g.block.left.src} alt={g.block.left.alt} caption={g.block.left.caption} />
+      <ImageCard src={g.block.right.src} alt={g.block.right.alt} caption={g.block.right.caption} />
+    </ImageRowHalf>
+  )
+) : (
+  <Section id={g.id} first={g.rails} meta={g.rails ? meta : []} anchors={g.rails ? anchors : []}>
+    {g.blocks.map((b) => <BlockContent block={b} />)}
+  </Section>
+))}

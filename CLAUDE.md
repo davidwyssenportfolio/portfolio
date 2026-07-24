@@ -2,7 +2,8 @@
 
 Statische Portfolio-Website, gebaut mit Astro. Umsetzung eines in Figma
 entwickelten Design Systems. Vorher gab es einen Webflow-Build; der ist
-zugunsten dieser Code-Umsetzung eingestellt worden.
+zugunsten dieser Code-Umsetzung eingestellt worden. Case Studies werden über
+**Keystatic** als lokales CMS gepflegt (siehe unten).
 
 **Sprache: Deutsch.** Fachbegriffe auf Englisch, wo das üblich ist
 (Breakpoint, Token, Grid, Commit). Keine englischen Antworten.
@@ -39,11 +40,14 @@ src/styles/tokens.css     Tokens 1:1 aus Figma, px-basiert
 src/styles/global.css     Layout-Klassen, Textstile, Content-Rhythmus
 src/lib/url.ts            Pfad-Helfer (base-fest) — PFLICHT für alle internen Pfade
 src/components/           Blockbibliothek, je eine responsive Komponente
+src/components/CaseRenderer.astro  Baut aus der Blockliste die Sections (Marker + Bild-Split)
+src/components/BlockContent.astro  Ein Block -> exakt die bekannten DOM-Elemente
 src/layouts/BaseLayout    HTML-Shell, Font-Einbindung, Preloads
 src/layouts/CaseStudyLayout  Fixe Case-Shell: Nav → Hero → erstes Bild → Slot → Footer
-src/content/cases/*.mdx   Content, validiert gegen src/content.config.ts
+src/content/cases/*.yaml  Content als Datendateien, validiert gegen src/content.config.ts
 src/pages/index.astro     Homepage-Galerie (16:9)
-src/pages/work/[slug].astro  Case-Route
+src/pages/work/[slug].astro  Case-Route (baut komplett aus entry.data, kein render())
+keystatic.config.ts       Lokales CMS (Schema-Spiegel der 9 Blöcke) — nur `npm run cms`
 public/img/               Bilder
 public/fonts/             Graphik woff2 — per .gitignore NICHT im Repo (Lizenz)
 ```
@@ -92,23 +96,66 @@ In `.section-content`: 16px zwischen fortlaufenden Absätzen, 24px vor
 
 ## Case Studies
 
-Die **Shell ist fix** (Nav → Hero → erstes Bild → Footer) und kommt komplett aus
-dem Frontmatter. Der **Content-Flow ist frei** — beliebige Abfolge dieser Blöcke:
+Ein Case ist eine **YAML-Datendatei** in `src/content/cases/` (Dateiname = Slug):
+feste **Kopffelder** (die Shell: Titel/H1, Overline, Subtitle, Intro, Hero-Bild,
+Cover, Meta Rail, Nav2-Anker, Reihenfolge, Entwurf) plus eine **flache Blockliste**
+`blocks`. Kein MDX-Fluss mehr, kein `render()` — `[slug].astro` baut komplett aus
+`entry.data`; `CaseRenderer` setzt daraus die bestehenden Komponenten zusammen.
 
-| Block | Zweck |
-|---|---|
-| `<Section id first meta anchors>` | 5-Spalten-Grid; `first` rendert Nav2- und Meta-Rail |
-| `<SectionHeader overline title lead>` | Overline · H2 · optionaler Lead (gap 12) |
-| `### Heading` + Absatz | H3-Block — 24 davor, 12 danach |
-| Absätze | Fortlaufend, 16 Abstand |
-| `<BodyBlock title>` | Body Title + Body, gap 0 |
-| `<ListBlock title>` | Titel + Liste, gap 12 |
-| `<ImageRow>` / `<ImageRow card>` | Bild volle Breite / auf Textspalte |
-| `<ImageRowHalf>` | Zweierzeile, kollabiert an keinem Breakpoint |
+Jeder Block hat die Form `{ discriminant, value }` (so serialisiert Keystatics
+`fields.conditional`). `CaseRenderer` normalisiert das intern auf `{ type, ...value }`.
+Die neun Blöcke:
 
-Neue Case Study = neue `.mdx` in `src/content/cases/`. Dateiname wird der Slug.
-Frontmatter-Schema in `src/content.config.ts` — fehlende Pflichtfelder brechen
-den Build ab, das ist Absicht.
+| discriminant | Felder | Rendert als (direktes Kind von `.section-content`, Bilder auf `.content`) |
+|---|---|---|
+| `newSection` | anchor | Marker: neue thematische Section mit Sprungmarke |
+| `sectionHeader` | overline, title, lead? | `<SectionHeader>` → `.section-header` |
+| `paragraph` | text | `<p>` ohne Klasse |
+| `h3` | title, text? | `<h3>` (+ `<p>` nur wenn text gesetzt — sonst bare `<h3>`) |
+| `bodyBlock` | title, text | `<BodyBlock>` → `.body-block` |
+| `listBlock` | title, items[] | `<ListBlock>` → `.list-block` + `<ul>` |
+| `imageFull` | src, alt, caption? | `<ImageCard>` direkt in `.content` |
+| `imageColumn` | src, alt, caption? | `<ImageRow card>` + `<ImageCard>` |
+| `imagePair` | left, right | `<ImageRowHalf>` + 2× `<ImageCard>` |
+
+**Section-Logik (in `CaseRenderer`):** Textblöcke werden in `<Section>` gruppiert,
+Bildblöcke stehen als Geschwister auf `.content`-Ebene. Ein Bildblock **schliesst**
+die laufende Section; der nächste Textblock öffnet **lazy** eine neue (keine leeren
+`<section>`). Anker-ID nur an der ersten Section einer thematischen Section (nicht
+an der Fortsetzung nach einem Bild); Meta Rail + Nav2 nur an der allerersten Section
+der Seite.
+
+**Selektor-Vertrag (Pflicht, sonst greift der Rhythmus in `global.css` nicht):**
+Blöcke als direkte Kinder von `.section-content`, echte `h3`-Elemente, und die
+Klassen `.section-header` / `.body-block` / `.list-block`. Alles andere ist frei.
+Abstände kommen NIE aus dem Content — nur aus den Nachbarschaftsregeln.
+
+Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
+Pflichtfelder brechen den Build ab, das ist Absicht.
+
+**Hinweis Typografie:** Das alte MDX lief durch Astros Markdown (smartypants →
+typografische Apostrophe ’). Datendateien werden NICHT durch Markdown geschickt —
+gewünschte Sonderzeichen stehen direkt im Text (im Editor eintippen).
+
+---
+
+## Keystatic (lokales CMS)
+
+Editor zum Anlegen/Pflegen der Case Studies: Blöcke per Drag-and-drop sortieren,
+Text/Bilder in Formularfeldern. Schreibt direkt die YAML-Dateien im Repo
+(`storage: local`), kein Cloud-Dienst.
+
+- **Starten:** `npm run cms` (setzt `KEYSTATIC=1`), dann `http://localhost:4321/keystatic`.
+- **Warum ein eigener Modus:** Keystatic verdrahtet die Pfade `/keystatic` und
+  `/api/keystatic` hart und ist mit `base: '/portfolio'` inkompatibel. Der CMS-Modus
+  läuft deshalb OHNE base. Der normale `npm run dev` und der Prod-Build behalten
+  `base '/portfolio'` und laden Keystatic **nicht** — der GitHub-Pages-Build bleibt
+  rein statisch (verifiziert: `npm run build` erzeugt nur HTML).
+- **Bildfelder** sind aktuell reine Pfad-Textfelder (Bilder liegen unverändert in
+  `public/img/`). Echte Bildverarbeitung/Upload ist ein bewusst nachgelagerter Schritt.
+- **Abnahme nach Content-Änderungen:** `/styleguide` muss weiterhin 0 Abweichungen
+  von den gemessenen Beziehungen zeigen (1440 · 992 · 480); der Selektor-Vertrag oben
+  ist die Bedingung dafür.
 
 ---
 
@@ -146,7 +193,6 @@ beurteilen, nie auf github.io.
 - Custom Cursor portieren — Vanilla-Demo existiert: Dot 16px / Blob 28px bei 35%
   Opazität / Pill mit Label über `data-cursor`-Attribut. Auf Touch deaktivieren.
 - Mobile-Menü (aktuell nur der „Menü"-Trigger)
-- Keystatic als lokales CMS auf Basis des Content-Schemas
 - Seiten „Über" und „Kontakt" (Nav-Links zeigen ins Leere)
 - Accent-Farbe — System ist derzeit vollständig monochrom
 - Hover-Interaktion auf H1 (später)
