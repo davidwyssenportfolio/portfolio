@@ -1,8 +1,25 @@
 ---
-import '../styles/fonts.css';
 import '../styles/tokens.css';
 import '../styles/global.css';
+import { url } from '../lib/url';
+
 const { title = 'David Wyssen — Portfolio', description = 'UX/UI Design Portfolio' } = Astro.props;
+
+// Graphik wird hier eingebunden statt in einer .css-Datei, weil die Pfade die
+// konfigurierte `base` kennen müssen (in reinem CSS nicht möglich).
+// Die woff2-Dateien liegen in public/fonts/ und sind per .gitignore vom Repo
+// ausgeschlossen (Lizenz). Fehlen sie, greift der Fallback-Stack aus tokens.css.
+const fontFace = `
+@font-face {
+  font-family: "Graphik";
+  src: url("${url('fonts/Graphik-Regular.woff2')}") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Graphik";
+  src: url("${url('fonts/Graphik-Medium.woff2')}") format("woff2");
+  font-weight: 500; font-style: normal; font-display: swap;
+}`;
 ---
 <!doctype html>
 <html lang="de">
@@ -11,6 +28,9 @@ const { title = 'David Wyssen — Portfolio', description = 'UX/UI Design Portfo
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="preload" href={url('fonts/Graphik-Regular.woff2')} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={url('fonts/Graphik-Medium.woff2')} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={fontFace}></style>
   </head>
   <body>
     <slot />

@@ -1,11 +1,11 @@
 ---
 import Logo from './Logo.astro';
-const base = import.meta.env.BASE_URL;
+import { url } from '../lib/url';
 const { active = '' } = Astro.props;
 const links = [
-  { label: 'Arbeiten', href: base },
-  { label: 'Über', href: base + 'ueber' },
-  { label: 'Kontakt', href: base + 'kontakt' },
+  { label: 'Arbeiten', href: url() },
+  { label: 'Über', href: url('ueber') },
+  { label: 'Kontakt', href: url('kontakt') },
 ];
 ---
 <nav class="nav">

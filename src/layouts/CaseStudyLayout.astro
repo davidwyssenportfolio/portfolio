@@ -5,10 +5,9 @@
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { url } from '../lib/url';
 const { entry } = Astro.props;
 const d = entry.data;
-const base = import.meta.env.BASE_URL;
-const hero = /^(https?:)?\//.test(d.heroImage) ? d.heroImage : `${base}${d.heroImage}`;
 ---
 <BaseLayout title={`${d.title} — David Wyssen`} description={d.intro}>
   <div class="page">
@@ -25,7 +24,7 @@ const hero = /^(https?:)?\//.test(d.heroImage) ? d.heroImage : `${base}${d.heroI
             <p class="text-body-lg">{d.intro}</p>
           </div>
         </div>
-        <img src={hero} alt={d.heroAlt} />
+        <img src={url(d.heroImage)} alt={d.heroAlt} />
       </header>
       <main class="content">
         <slot />

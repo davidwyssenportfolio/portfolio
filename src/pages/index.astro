@@ -2,14 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { url } from '../lib/url';
 import { getCollection } from 'astro:content';
-const base = import.meta.env.BASE_URL;
 const cases = (await getCollection('cases', ({ data }) => !data.draft))
   .sort((a, b) => a.data.order - b.data.order);
 // Galerie-Zeilen: ab 1280 zwei Spalten -> paarweise gruppieren
 const rows = [];
 for (let i = 0; i < cases.length; i += 2) rows.push(cases.slice(i, i + 2));
-const img = (src) => (/^(https?:)?\//.test(src) ? src : `${base}${src}`);
 ---
 <BaseLayout>
   <div class="header">
@@ -21,8 +20,8 @@ const img = (src) => (/^(https?:)?\//.test(src) ? src : `${base}${src}`);
     {rows.map((row) => (
       <div class="home-gallery-row">
         {row.map((c) => (
-          <a class="home-gallery-item" href={`${base}work/${c.id}`} aria-label={c.data.title}>
-            <img src={img(c.data.cover ?? c.data.heroImage)} alt={c.data.coverAlt || c.data.title} loading="lazy" />
+          <a class="home-gallery-item" href={url(`work/${c.id}`)} aria-label={c.data.title}>
+            <img src={url(c.data.cover ?? c.data.heroImage)} alt={c.data.coverAlt || c.data.title} loading="lazy" />
           </a>
         ))}
       </div>
