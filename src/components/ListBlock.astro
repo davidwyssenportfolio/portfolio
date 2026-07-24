@@ -1,0 +1,8 @@
+---
+// Titel + Liste — gap 12. Listentyp (ul/ol) wählt der Autor im Slot.
+const { title } = Astro.props;
+---
+<div class="list-block">
+  {title && <p class="text-body-title">{title}</p>}
+  <slot />
+</div>

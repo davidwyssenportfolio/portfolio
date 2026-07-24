@@ -1,0 +1,17 @@
+{
+  "name": "david-wyssen-portfolio",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.0",
+    "astro": "^5.4.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

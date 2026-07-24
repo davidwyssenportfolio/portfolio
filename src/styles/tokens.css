@@ -1,0 +1,97 @@
+/* ============================================================
+   Portfolio Design System — Tokens
+   Quelle: Figma "Portfolio Design" / tokens.json
+   px-basiert (Vorgabe: px, nicht rem)
+   ============================================================ */
+
+:root {
+  /* --- Colors: Primitives --- */
+  --primary-900: #1d1d1f;
+  --primary-800: #343435;
+  --primary-700: #4a4a4c;
+  --primary-600: #616162;
+  --primary-500: #777779;
+  --primary-400: #8e8e8f;
+  --primary-300: #a5a5a5;
+  --primary-200: #bbbbbc;
+  --primary-100: #d2d2d2;
+  --primary-050: #f4f4f4;
+  --primary-000: #ffffff;
+
+  /* --- Colors: Semantic --- */
+  --text-primary: var(--primary-900);
+  --text-hover: var(--primary-800);
+  --text-muted: var(--primary-600);
+  --text-secondary: var(--primary-500);
+  --text-subtle: var(--primary-400);
+  --text-tertiary: var(--primary-300);
+  --text-inverse: var(--primary-050);
+  --text-inverse-hover: var(--primary-100);
+  --surface-default: var(--primary-000);
+  --surface-inverse: var(--primary-900);
+
+  /* --- Typography --- */
+  --font-family: "Graphik", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --size-3xl: 48px;
+  --size-xl: 24px;
+  --size-lg: 22px;
+  --size-md: 18px;
+  --size-sm: 15px;
+
+  --line-height-3xl: 60px;
+  --line-height-xl: 31px;
+  --line-height-lg: 30px;
+  --line-height-md: 25px;
+  --line-height-sm: 21px;
+  --line-height-subtitle: 20px;
+  --line-height-nav: 24px;
+  --line-height-nav2: 16px;
+
+  --letter-spacing-display: -0.24px;
+
+  /* --- Spacing --- */
+  --spacing-004: 4px;
+  --spacing-008: 8px;
+  --spacing-012: 12px;
+  --spacing-016: 16px;
+  --spacing-020: 20px;
+  --spacing-024: 24px;
+  --spacing-032: 32px;
+  --spacing-040: 40px;
+  --spacing-048: 48px;
+  --spacing-056: 56px;
+  --spacing-064: 64px;
+  --spacing-072: 72px;
+  --spacing-080: 80px;
+  --spacing-088: 88px;
+  --spacing-096: 96px;
+  --spacing-104: 104px;
+  --spacing-112: 112px;
+  --spacing-120: 120px;
+  --spacing-160: 160px;
+
+  /* --- Layout ---
+     Aliases auf Spacing-Primitives funktionieren hier nativ —
+     das war der Webflow-MCP-Constraint, in CSS existiert er nicht. */
+  --container-max: 1312px;
+  --page-margin: 64px;                       /* Mode: 24 bei <= 767 */
+  --grid-gutter: var(--spacing-032);         /* Mode: 024 bei <= 767 */
+  --section-gap: var(--spacing-040);
+  --nav-hero-gap: 68px;                      /* bewusst ausserhalb der 8px-Skala */
+  --hero-content-gap: var(--spacing-080);
+  --image-gap: var(--spacing-032);
+  --rail-item-gap: var(--spacing-012);
+  --content-footer-gap: var(--spacing-160);
+}
+
+/* --- Modes: Mobile landscape + portrait (<= 767) ---
+   Nur diese zwei Tokens wechseln — exakt wie die Webflow-Modes. */
+@media (max-width: 767px) {
+  :root {
+    --page-margin: var(--spacing-024);
+    --grid-gutter: var(--spacing-024);
+  }
+}

@@ -1,0 +1,9 @@
+---
+// Overline · H2 (· Lead) — gap 12
+const { overline, title, lead } = Astro.props;
+---
+<header class="section-header">
+  {overline && <p class="text-overline">{overline}</p>}
+  <h2 class="text-heading-lg">{title}</h2>
+  {lead && <p class="text-body">{lead}</p>}
+</header>

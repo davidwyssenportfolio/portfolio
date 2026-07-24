@@ -1,0 +1,236 @@
+/* ============================================================
+   Portfolio Design System — Globale Klassen
+   Basis = 992-Zustand (Desktop). Overrides:
+   >= 1280 (Enhancement) und <= 991 (Collapse) — wie dokumentiert.
+   ============================================================ */
+
+/* --- Reset / Basis --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-primary);
+  background: var(--surface-default);
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; width: 100%; height: auto; } /* Breite definiert, Höhe frei */
+a { color: inherit; text-decoration: none; }
+ul, ol { padding-left: 1.2em; }
+:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+/* ============================================================
+   Textstile — 1:1 die 13 Figma-Styles
+   ============================================================ */
+.text-display    { font-weight: 500; font-size: var(--size-3xl); line-height: var(--line-height-3xl); letter-spacing: var(--letter-spacing-display); color: var(--text-primary); }
+.text-heading-lg { font-weight: 500; font-size: var(--size-xl); line-height: var(--line-height-xl); color: var(--text-primary); }
+.text-heading-sm { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.text-body-lg    { font-weight: 400; font-size: var(--size-lg); line-height: var(--line-height-lg); color: var(--text-primary); }
+.text-body       { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.text-body-title { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-secondary); }
+.text-subtitle   { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-subtitle); color: var(--text-secondary); }
+.text-overline   { font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm); color: var(--text-muted); }
+.text-caption    { font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm); color: var(--text-muted); }
+.text-meta-label { font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm); color: var(--text-secondary); }
+.text-meta-value { font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm); color: var(--text-primary); }
+.text-nav        { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-nav); text-transform: none; letter-spacing: 0; }
+.text-nav2       { font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-nav2); text-transform: none; letter-spacing: 0; }
+
+/* Nav-States: normal -> subtle · hover -> hover · active -> primary */
+.text-nav             { color: var(--text-subtle); }
+.text-nav:hover       { color: var(--text-hover); }
+.text-nav.is-active   { color: var(--text-primary); }
+/* Nav2-States: normal -> muted · hover -> hover · active -> primary */
+.text-nav2            { color: var(--text-muted); }
+.text-nav2:hover      { color: var(--text-hover); }
+.text-nav2.is-active  { color: var(--text-primary); }
+
+/* ============================================================
+   Seiten-Shell
+   ============================================================ */
+.page      { padding-inline: var(--page-margin); }
+.container { max-width: var(--container-max); margin-inline: auto; display: flex; flex-direction: column; }
+
+/* --- Nav (2 Spalten: Logo links, Links ab Spalte 2) --- */
+.nav {
+  display: flex; align-items: center;
+  column-gap: var(--grid-gutter);
+  padding-block: var(--spacing-024);
+  min-height: 80px;
+}
+.nav-start { flex: 1 1 0; }
+.nav-end   { flex: 1 1 0; }
+.nav-links { display: flex; column-gap: var(--spacing-040); } /* 40, nicht der Gutter */
+.nav-menu-toggle { display: none; }
+
+/* --- Hero --- */
+.hero {
+  display: flex; flex-direction: column;
+  row-gap: var(--spacing-032);
+  padding-top: var(--nav-hero-gap);
+  padding-bottom: var(--hero-content-gap);
+}
+.hero-columns { display: flex; column-gap: var(--grid-gutter); }
+.title-block  { flex: 1 1 0; display: flex; flex-direction: column; row-gap: var(--spacing-012); }
+.intro-column { flex: 1 1 0; padding-top: var(--spacing-004); }
+
+/* ============================================================
+   Content-Fluss
+   Sections und Bildblöcke sind Geschwister — Abstände über Margins,
+   damit sich beide frei abwechseln können.
+   ============================================================ */
+.content { display: flex; flex-direction: column; }
+.content > * + * { margin-top: var(--image-gap); }         /* 32 zwischen Blöcken */
+.content > .section + .section { margin-top: var(--section-gap); } /* 40 Section -> Section */
+
+/* --- 5-Spalten-Section-Grid (Basis = 992) --- */
+.section {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  column-gap: var(--grid-gutter);
+}
+.section-content { grid-column: 2 / 6; }
+
+/* Erste Section trägt Nav2- und Meta-Rail */
+.section--with-rails { row-gap: var(--spacing-080); }      /* Meta-Zeile -> Content-Zeile */
+.section--with-rails .section-content { grid-row: 2 / 3; }
+.meta-rail {
+  grid-column: 2 / 6; grid-row: 1 / 2;
+  display: flex; flex-direction: row;
+  column-gap: var(--grid-gutter);
+}
+.nav2-rail { grid-column: 1 / 2; grid-row: 1 / 3; }
+.nav2 {
+  display: flex; flex-direction: column;
+  row-gap: var(--spacing-016);
+  position: sticky; top: var(--spacing-024);
+}
+.meta-row { display: flex; flex-direction: column; }        /* gap 0 */
+
+/* --- Content-Rhythmus: 16 Continuation / 24 neues Topic ---
+   Ersetzt den .topic-Wrapper — der Rhythmus ergibt sich aus
+   der Beziehung der Nachbarn, nicht aus Struktur. */
+.section-content > * + * { margin-top: var(--spacing-016); }
+.section-content > * + h3,
+.section-content > * + .list-block,
+.section-content > * + .section-header { margin-top: var(--spacing-024); }
+.section-content h3 + p { margin-top: var(--spacing-012); } /* H3-Block intern */
+
+/* Markdown-Elemente im Content erben die Textstile */
+.section-content p  { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.section-content h3 { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.section-content ul,
+.section-content ol { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.section-content li + li { margin-top: var(--spacing-008); }
+
+/* --- Blöcke --- */
+.section-header { display: flex; flex-direction: column; row-gap: var(--spacing-012); }
+.body-block > * + * { margin-top: 0; }                      /* Body Title + Body, gap 0 */
+.list-block { display: flex; flex-direction: column; row-gap: var(--spacing-012); }
+.list-block ul, .list-block ol { margin: 0; }
+
+/* --- Bilder --- */
+.image-row      { display: grid; grid-template-columns: repeat(5, 1fr); column-gap: var(--grid-gutter); }
+.image-row-card { grid-column: 2 / 6; }
+.image-row-half { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: var(--grid-gutter); } /* kollabiert nie */
+.image-card     { display: flex; flex-direction: column; row-gap: var(--spacing-016); }
+
+/* ============================================================
+   >= 1280 — Content 3 Spalten, Meta-Rail rechts vertikal
+   ============================================================ */
+@media (min-width: 1280px) {
+  .section--with-rails { row-gap: 0; }
+  .section--with-rails .section-content { grid-column: 2 / 5; grid-row: 1 / 2; }
+  .section-content { grid-column: 2 / 5; }
+  .meta-rail {
+    grid-column: 5 / 6; grid-row: 1 / 2;
+    flex-direction: column;
+    row-gap: var(--rail-item-gap);
+  }
+  .nav2-rail { grid-row: 1 / 2; }
+  .image-row-card { grid-column-end: 5; }
+}
+
+/* ============================================================
+   <= 991 — Collapse: Nav2 weg, Grid einspaltig, Hero stapelt
+   ============================================================ */
+@media (max-width: 991px) {
+  .section { grid-template-columns: 1fr; }
+  .section-content { grid-column: 1 / 2; }
+  .section--with-rails .section-content { grid-row: 2 / 3; }
+  .meta-rail { grid-column: 1 / 2; grid-row: 1 / 2; flex-direction: row; }
+  .nav2-rail { display: none; }
+  .image-row { grid-template-columns: 1fr; }
+  .image-row-card { grid-column: 1 / 2; }
+
+  .meta-rail .meta-row { flex: 0 0 auto; width: 102px; }    /* fixe Item-Breite, linksbündig */
+
+  .hero-columns { flex-direction: column; row-gap: var(--spacing-032); }
+  .intro-column { padding-top: 0; }                         /* 4px-Offset entfällt */
+
+  .nav { justify-content: space-between; }
+  .nav-start, .nav-end { flex: 0 0 auto; }
+  .nav-links { display: none; }
+  .nav-menu-toggle { display: block; color: var(--text-subtle); }
+}
+
+/* ============================================================
+   Footer — 160 Weissraum, dann dunkle Full-Bleed-Fläche
+   ============================================================ */
+.footer-spacer { height: var(--content-footer-gap); }
+.footer {
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  padding-block: var(--spacing-072);
+  padding-inline: var(--page-margin);
+}
+.footer .text-display,
+.footer .text-heading-lg { color: var(--text-inverse); }
+.footer-columns  { display: flex; column-gap: var(--grid-gutter); }
+.footer-headline { flex: 1 1 0; }
+.footer-contact  {
+  display: flex; flex-direction: column;
+  row-gap: var(--spacing-032); column-gap: var(--spacing-032);
+  padding-top: var(--spacing-004);
+  flex: 1 1 0;
+}
+.footer-link:hover { color: var(--text-inverse-hover); }
+
+@media (min-width: 1280px) {
+  .footer-headline { flex: 0 0 442px; }
+  .footer-contact  { flex-direction: row; flex: 0 0 auto; }
+}
+@media (min-width: 1440px) {
+  .footer-headline { flex: 1 1 0; }
+  .footer-contact  { flex: 1 1 0; flex-direction: row; }
+}
+@media (max-width: 767px) {
+  .meta-rail .meta-row { width: 90px; }
+
+  .footer-columns { flex-direction: column; row-gap: var(--spacing-032); }
+  .footer-contact { padding-top: 0; }
+}
+
+/* ============================================================
+   Homepage — Header + Full-Bleed-Galerie (Margin = Gutter)
+   ============================================================ */
+.header { background: var(--surface-default); padding-inline: var(--page-margin); }
+.home-gallery {
+  display: flex; flex-direction: column;
+  row-gap: var(--grid-gutter);
+  padding-inline: var(--grid-gutter);       /* Gutter, NICHT page-margin */
+  padding-bottom: var(--page-margin);
+  margin-top: 197px;                         /* reservierter Raum Header -> Grid */
+}
+.home-gallery-row  { display: flex; flex-direction: column; gap: var(--grid-gutter); }
+.home-gallery-item { flex: 1 1 0; aspect-ratio: 16 / 9; overflow: hidden; }
+.home-gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+
+@media (min-width: 1280px) { .home-gallery-row { flex-direction: row; } }
+@media (max-width: 991px)  { .home-gallery { margin-top: 286px; } }
+@media (max-width: 767px)  { .home-gallery { margin-top: 317px; } }
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

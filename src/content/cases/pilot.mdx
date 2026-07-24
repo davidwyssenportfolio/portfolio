@@ -1,0 +1,71 @@
+---
+title: Pilot Case Study
+overline: Digital Product
+subtitle: Design System & Responsive Build
+intro: Platzhalter-Intro für den Pilot-Case. Zwei bis drei Sätze, die das Projekt einordnen — Aufgabe, Kontext, Ergebnis. Der Text füllt die zweite Hero-Spalte und beginnt mit dem 4px-Offset auf Höhe des Titels.
+heroImage: img/hero-pilot.svg
+heroAlt: Hero-Platzhalter
+cover: img/cover-pilot.svg
+coverAlt: Cover Pilot Case
+order: 1
+meta:
+  - { label: Jahr, value: "2026" }
+  - { label: Rolle, value: UX/UI Design }
+  - { label: Leistung, value: Design System }
+  - { label: Umsetzung, value: Astro }
+anchors:
+  - { label: Überblick, href: "#ueberblick" }
+  - { label: Prozess, href: "#prozess" }
+  - { label: Ergebnis, href: "#ergebnis" }
+---
+
+<Section id="ueberblick" first meta={frontmatter.meta} anchors={frontmatter.anchors}>
+  <SectionHeader overline="01" title="Überblick" lead="Lead-Absatz direkt im Section Header — gap 12 zum H2, danach greift der Content-Rhythmus." />
+
+  Ein Continuation-Absatz: 16px Abstand zum Block darüber, weil er inhaltlich dazugehört.
+
+  Noch ein Absatz — wieder 16px. Der Rhythmus entsteht automatisch aus der Nachbarschaft, ohne Wrapper.
+
+  ### Ein neues Topic
+
+  Vor dem H3 stehen 24px, danach 12px — der H3-Block aus Figma, hier rein über CSS-Nachbarschaft abgebildet.
+
+  <BodyBlock title="Body Title">
+    Der Body-Block: Titel und Text ohne Abstand (gap 0), als eigener Block mit 16px Anschluss nach oben.
+  </BodyBlock>
+
+  <ListBlock title="Leistungen">
+    - Research & Konzept
+    - Design System
+    - Responsive Build
+  </ListBlock>
+</Section>
+
+<ImageRow>
+  <ImageCard src="img/full-01.svg" alt="" caption="Volle Content-Breite — Bildblöcke sind Geschwister der Sections, nicht Teil der Textspalte." />
+</ImageRow>
+
+<Section id="prozess">
+  <SectionHeader overline="02" title="Prozess" />
+
+  Sections ohne Rails sind einfache 5-Spalten-Grids — der Text sitzt ab 1280 auf drei, bei 992 auf vier Spalten, darunter volle Breite.
+
+  ### Vom Board zum Code
+
+  Zwischen zwei Sections liegen 40px, zwischen Section und Bildblock 32px — beides über den Content-Fluss geregelt.
+</Section>
+
+<ImageRow card>
+  <ImageCard src="img/card-01.svg" alt="" caption="Karte auf der Textspalte — folgt dem 3/4-Spalten-Mass des Contents." />
+</ImageRow>
+
+<ImageRowHalf>
+  <ImageCard src="img/half-01.svg" alt="" caption="Zwei nebeneinander." />
+  <ImageCard src="img/half-02.svg" alt="" caption="Die Zeile kollabiert an keinem Breakpoint — auch bei 480 bleiben es zwei Spalten." />
+</ImageRowHalf>
+
+<Section id="ergebnis">
+  <SectionHeader overline="03" title="Ergebnis" />
+
+  Abschluss-Section. Danach folgen 160px Weissraum und der dunkle Footer — beides Teil der fixen Shell.
+</Section>

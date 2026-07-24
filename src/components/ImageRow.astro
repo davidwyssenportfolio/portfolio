@@ -1,0 +1,13 @@
+---
+// 5-Spalten-Bildzeile. card=true richtet das Bild an der Textspalte aus
+// (Spalten 2–4 ab 1280 / 2–5 bei 992 / volle Breite darunter).
+// Ohne card: volle Content-Breite — dann das Bild direkt in .content setzen.
+const { card = false } = Astro.props;
+---
+{card ? (
+  <div class="image-row">
+    <div class="image-row-card"><slot /></div>
+  </div>
+) : (
+  <slot />
+)}

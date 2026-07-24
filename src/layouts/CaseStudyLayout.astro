@@ -1,0 +1,36 @@
+---
+// Fixe Shell jeder Case Study:
+// Nav 1 -> Hero (Overline · Title · Subtitle | Intro) -> erstes Bild -> Content-Slot -> Footer.
+// Nav2 + Meta-Rail rendert die erste <Section first …> im Content.
+import BaseLayout from './BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+const { entry } = Astro.props;
+const d = entry.data;
+const base = import.meta.env.BASE_URL;
+const hero = /^(https?:)?\//.test(d.heroImage) ? d.heroImage : `${base}${d.heroImage}`;
+---
+<BaseLayout title={`${d.title} — David Wyssen`} description={d.intro}>
+  <div class="page">
+    <div class="container">
+      <Nav active="Arbeiten" />
+      <header class="hero">
+        <div class="hero-columns">
+          <div class="title-block">
+            {d.overline && <p class="text-overline">{d.overline}</p>}
+            <h1 class="text-display">{d.title}</h1>
+            {d.subtitle && <p class="text-subtitle">{d.subtitle}</p>}
+          </div>
+          <div class="intro-column">
+            <p class="text-body-lg">{d.intro}</p>
+          </div>
+        </div>
+        <img src={hero} alt={d.heroAlt} />
+      </header>
+      <main class="content">
+        <slot />
+      </main>
+    </div>
+  </div>
+  <Footer />
+</BaseLayout>

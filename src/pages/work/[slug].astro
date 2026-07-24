@@ -1,0 +1,21 @@
+---
+import { getCollection, render } from 'astro:content';
+import CaseStudyLayout from '../../layouts/CaseStudyLayout.astro';
+import Section from '../../components/Section.astro';
+import SectionHeader from '../../components/SectionHeader.astro';
+import BodyBlock from '../../components/BodyBlock.astro';
+import ListBlock from '../../components/ListBlock.astro';
+import ImageCard from '../../components/ImageCard.astro';
+import ImageRow from '../../components/ImageRow.astro';
+import ImageRowHalf from '../../components/ImageRowHalf.astro';
+
+export async function getStaticPaths() {
+  const cases = await getCollection('cases', ({ data }) => !data.draft);
+  return cases.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<CaseStudyLayout entry={entry}>
+  <Content components={{ Section, SectionHeader, BodyBlock, ListBlock, ImageCard, ImageRow, ImageRowHalf }} />
+</CaseStudyLayout>

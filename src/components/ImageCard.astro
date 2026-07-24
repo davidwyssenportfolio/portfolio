@@ -1,0 +1,10 @@
+---
+// Bild + optionale Caption — gap 16. Breite definiert, Höhe frei.
+const { src, alt = '', caption } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const resolved = /^(https?:)?\//.test(src) ? src : `${base}${src}`;
+---
+<figure class="image-card">
+  <img src={resolved} alt={alt} loading="lazy" />
+  {caption && <figcaption class="text-caption">{caption}</figcaption>}
+</figure>

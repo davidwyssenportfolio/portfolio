@@ -1,0 +1,30 @@
+---
+const contact = {
+  address: ['David Wyssen', 'Schweiz'],
+  reach: ['hallo@davidwyssen.ch'],
+  social: ['LinkedIn', 'Instagram'],
+};
+---
+<div class="footer-spacer" aria-hidden="true"></div>
+<footer class="footer">
+  <div class="container">
+    <div class="footer-columns">
+      <div class="footer-headline">
+        <p class="text-display">Hallo — sprechen wir über Ihr Projekt.</p>
+      </div>
+      <div class="footer-contact">
+        <div>
+          {contact.address.map((line) => <p class="text-heading-lg">{line}</p>)}
+        </div>
+        <div>
+          {contact.reach.map((line) => (
+            <p class="text-heading-lg"><a class="footer-link" href={`mailto:${line}`}>{line}</a></p>
+          ))}
+        </div>
+        <div>
+          {contact.social.map((line) => <p class="text-heading-lg"><a class="footer-link" href="#">{line}</a></p>)}
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

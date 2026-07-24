@@ -1,0 +1,32 @@
+---
+// 5-Spalten-Section-Grid. Die erste Section trägt Nav2- und Meta-Rail.
+// Verwendung im MDX:
+//   <Section id="ueberblick" first meta={frontmatter.meta} anchors={frontmatter.anchors}> … </Section>
+//   <Section id="prozess"> … </Section>
+const { id, first = false, meta = [], anchors = [] } = Astro.props;
+const hasRails = first && (meta.length > 0 || anchors.length > 0);
+---
+<section id={id} class:list={['section', { 'section--with-rails': hasRails }]}>
+  {hasRails && anchors.length > 0 && (
+    <div class="nav2-rail">
+      <nav class="nav2" aria-label="Seiteninhalt">
+        {anchors.map((a) => (
+          <a class="text-nav2" href={a.href}>{a.label}</a>
+        ))}
+      </nav>
+    </div>
+  )}
+  {hasRails && meta.length > 0 && (
+    <div class="meta-rail">
+      {meta.map((m) => (
+        <div class="meta-row">
+          <span class="text-meta-label">{m.label}</span>
+          <span class="text-meta-value">{m.value}</span>
+        </div>
+      ))}
+    </div>
+  )}
+  <div class="section-content">
+    <slot />
+  </div>
+</section>
