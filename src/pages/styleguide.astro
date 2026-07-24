@@ -1,0 +1,360 @@
+---
+// Styleguide — misst die real gerenderten Werte im Browser und zeigt sie an.
+// Bewusst live gemessen statt abgetippt: so kann die Seite nicht veralten
+// oder etwas behaupten, das der Code nicht tut.
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const textStyles = [
+  { klasse: 'text-display',     rolle: 'H1 — Case-Titel',                  tag: 'h1' },
+  { klasse: 'text-heading-lg',  rolle: 'H2 · Footer-Kontakt',              tag: 'p' },
+  { klasse: 'text-intro',       rolle: 'Intro in der zweiten Hero-Spalte',  tag: 'p' },
+  { klasse: 'text-heading-sm',  rolle: 'H3',                               tag: 'p' },
+  { klasse: 'text-body-lg',     rolle: 'Lead im Section Header',           tag: 'p' },
+  { klasse: 'text-body',        rolle: 'Fliesstext · Listen',              tag: 'p' },
+  { klasse: 'text-body-title',  rolle: 'Body Title · List Title',          tag: 'p' },
+  { klasse: 'text-subtitle',    rolle: 'Subtitle im Hero',                 tag: 'p' },
+  { klasse: 'text-overline',    rolle: 'Overline über H2',                 tag: 'p' },
+  { klasse: 'text-caption',     rolle: 'Bildunterschrift',                 tag: 'p' },
+  { klasse: 'text-meta-label',  rolle: 'Meta Rail — Label',                tag: 'p' },
+  { klasse: 'text-meta-value',  rolle: 'Meta Rail — Wert',                 tag: 'p' },
+  { klasse: 'text-nav',         rolle: 'Hauptnavigation',                  tag: 'p' },
+  { klasse: 'text-nav2',        rolle: 'Anker-Navigation',                 tag: 'p' },
+];
+
+const blockGaps = [
+  { block: 'Section Header', inhalt: 'Overline · H2 · Lead',       soll: 12 },
+  { block: 'H3-Block',       inhalt: 'H3 · Body',                  soll: 12 },
+  { block: 'Body Block',     inhalt: 'Body Title · Body',          soll: 0 },
+  { block: 'List Block',     inhalt: 'List Title · Liste',         soll: 12 },
+  { block: 'Meta Row',       inhalt: 'Label · Wert',               soll: 0 },
+  { block: 'Image Card',     inhalt: 'Bild · Caption',             soll: 16 },
+];
+
+const flowGaps = [
+  { von: 'Absatz',            zu: 'Absatz (fortlaufend)',   soll: 16 },
+  { von: 'beliebig',          zu: 'H3 (neues Topic)',       soll: 24 },
+  { von: 'beliebig',          zu: 'List Block',             soll: 24 },
+  { von: 'H3',                zu: 'Body im H3-Block',       soll: 12 },
+  { von: 'Section',           zu: 'Section',                soll: 40 },
+  { von: 'Bildblock',         zu: 'Bildblock',              soll: 32 },
+  { von: 'Hero',              zu: 'Content',                soll: 80 },
+  { von: 'Meta-Zeile',        zu: 'Content-Zeile (≤1279)',  soll: 80 },
+  { von: 'Nav',               zu: 'Hero',                   soll: 68 },
+  { von: 'Content',           zu: 'Footer',                 soll: 160 },
+  { von: 'Meta Rows',         zu: 'vertikal (≥1280)',       soll: 12 },
+];
+
+const farben = [
+  { token: 'text/primary',       hex: '#1d1d1f', nutzung: 'H1–H3, Body, Meta-Wert, Nav aktiv' },
+  { token: 'text/hover',         hex: '#343435', nutzung: 'Nav- und Nav2-Hover' },
+  { token: 'text/muted',         hex: '#616162', nutzung: 'Overline, Caption, Nav2 normal' },
+  { token: 'text/secondary',     hex: '#777779', nutzung: 'Body Title, Subtitle, Meta-Label' },
+  { token: 'text/subtle',        hex: '#8e8e8f', nutzung: 'Nav normal, „Menü" mobil' },
+  { token: 'text/tertiary',      hex: '#a5a5a5', nutzung: 'Menü-Elemente' },
+  { token: 'text/inverse',       hex: '#f4f4f4', nutzung: 'Text auf dunklem Footer' },
+  { token: 'text/inverse-hover', hex: '#d2d2d2', nutzung: 'Footer-Links im Hover' },
+  { token: 'surface/default',    hex: '#ffffff', nutzung: 'Seitenfläche' },
+  { token: 'surface/inverse',    hex: '#1d1d1f', nutzung: 'Footer-Fläche' },
+];
+
+const layout = [
+  { token: 'container-max',       wert: '1312px', hinweis: 'kappt die Breite, zentriert ab 1440' },
+  { token: 'page-margin',         wert: '64 / 24', hinweis: '24 ab ≤767 (Mode)' },
+  { token: 'grid-gutter',         wert: '32 / 24', hinweis: '24 ab ≤767 (Mode)' },
+  { token: 'section-gap',         wert: '40px',   hinweis: 'Section → Section' },
+  { token: 'nav-hero-gap',        wert: '68px',   hinweis: 'bewusst ausserhalb der 8er-Skala' },
+  { token: 'hero-content-gap',    wert: '80px',   hinweis: 'Hero → Content' },
+  { token: 'image-gap',           wert: '32px',   hinweis: 'zwischen Bildblöcken' },
+  { token: 'rail-item-gap',       wert: '12px',   hinweis: 'Meta Rail vertikal' },
+  { token: 'content-footer-gap',  wert: '160px',  hinweis: 'Content → Footer' },
+];
+
+const raster = [
+  { bp: '≥1280', nav2: 'Spalte 1, Zeile 1', content: 'Spalten 2–4 (3 Spalten)', meta: 'Spalte 5, vertikal, 12', rowgap: '0' },
+  { bp: '992',   nav2: 'Spalte 1, Zeilen 1–2', content: 'Spalten 2–5 (4 Spalten), Zeile 2', meta: 'Spalten 2–5, horizontal, 32', rowgap: '80' },
+  { bp: '≤991',  nav2: 'ausgeblendet', content: 'volle Breite, Zeile 2', meta: 'volle Breite, horizontal', rowgap: '80' },
+];
+---
+
+<BaseLayout title="Styleguide — David Wyssen" description="Design-System-Referenz mit live gemessenen Werten">
+  <div class="page">
+    <div class="container">
+      <header class="sg-head">
+        <p class="text-overline">Design System</p>
+        <h1 class="text-display">Styleguide</h1>
+        <p class="text-body-lg">
+          Alle Werte auf dieser Seite werden im Browser gemessen, nicht abgetippt.
+          Was hier steht, ist das, was der Code tatsächlich rendert.
+        </p>
+      </header>
+
+      {/* ── Textstile ─────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Textstile</h2>
+        <div class="sg-table" id="sg-type">
+          <div class="sg-row sg-row--head">
+            <span class="text-meta-label">Beispiel</span>
+            <span class="text-meta-label">Klasse · Rolle</span>
+            <span class="text-meta-label">Schrift</span>
+            <span class="text-meta-label">Grösse / Zeile</span>
+            <span class="text-meta-label">Farbe</span>
+          </div>
+          {textStyles.map((s) => (
+            <div class="sg-row" data-sample={s.klasse}>
+              <div class="sg-specimen">
+                <p class={s.klasse}>Graphik&nbsp;— Aa Bb Cc 123</p>
+              </div>
+              <div>
+                <p class="text-meta-value">.{s.klasse}</p>
+                <p class="text-caption">{s.rolle}</p>
+              </div>
+              <p class="text-meta-value" data-field="font">—</p>
+              <p class="text-meta-value" data-field="size">—</p>
+              <p class="text-meta-value" data-field="color">—</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Blöcke ────────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Blöcke — Abstand innerhalb</h2>
+        <div class="sg-table">
+          <div class="sg-row sg-row--3 sg-row--head">
+            <span class="text-meta-label">Block</span>
+            <span class="text-meta-label">Inhalt</span>
+            <span class="text-meta-label">Abstand</span>
+          </div>
+          {blockGaps.map((b) => (
+            <div class="sg-row sg-row--3">
+              <p class="text-meta-value">{b.block}</p>
+              <p class="text-caption">{b.inhalt}</p>
+              <p class="text-meta-value">{b.soll} px</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Fluss ─────────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Abstände zwischen Elementen</h2>
+        <div class="sg-table">
+          <div class="sg-row sg-row--3 sg-row--head">
+            <span class="text-meta-label">Von</span>
+            <span class="text-meta-label">Zu</span>
+            <span class="text-meta-label">Abstand</span>
+          </div>
+          {flowGaps.map((g) => (
+            <div class="sg-row sg-row--3">
+              <p class="text-meta-value">{g.von}</p>
+              <p class="text-caption">{g.zu}</p>
+              <p class="text-meta-value">{g.soll} px</p>
+            </div>
+          ))}
+        </div>
+        <p class="text-caption sg-note">
+          Der Rhythmus entsteht aus der Beziehung der Nachbarn, nicht aus Wrappern:
+          fortlaufender Text 16, vor einer Überschrift 24. In Figma erlaubt Auto Layout
+          nur einen Gap pro Frame — dort wirkt die Spalte deshalb gleichmässig.
+        </p>
+      </section>
+
+      {/* ── Live-Messung am echten Content ────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Gemessen am gerenderten Content</h2>
+        <p class="text-caption sg-note">
+          Gemessene Abstände aus einem echten Content-Block. Weicht ein Wert vom
+          Soll oben ab, stimmt etwas im CSS nicht.
+        </p>
+        <div class="sg-probe" aria-hidden="true">
+          <div class="section">
+            <div class="section-content" id="sg-probe-content">
+              <header class="section-header">
+                <p class="text-overline">Overline</p>
+                <h2 class="text-heading-lg">Überschrift</h2>
+                <p class="text-body-lg">Lead-Absatz im Section Header.</p>
+              </header>
+              <p>Fortlaufender Absatz.</p>
+              <p>Zweiter fortlaufender Absatz.</p>
+              <h3>Neues Topic</h3>
+              <p>Absatz im H3-Block.</p>
+              <div class="body-block">
+                <p class="text-body-title">Body Title</p>
+                <p>Body im Body Block.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sg-table" id="sg-measured">
+          <div class="sg-row sg-row--3 sg-row--head">
+            <span class="text-meta-label">Von</span>
+            <span class="text-meta-label">Zu</span>
+            <span class="text-meta-label">Gemessen</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Farben ────────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Farben</h2>
+        <div class="sg-table">
+          <div class="sg-row sg-row--color sg-row--head">
+            <span class="text-meta-label"></span>
+            <span class="text-meta-label">Token</span>
+            <span class="text-meta-label">Hex</span>
+            <span class="text-meta-label">Verwendung</span>
+          </div>
+          {farben.map((f) => (
+            <div class="sg-row sg-row--color">
+              <span class="sg-swatch" style={`background:${f.hex}`}></span>
+              <p class="text-meta-value">{f.token}</p>
+              <p class="text-meta-value">{f.hex}</p>
+              <p class="text-caption">{f.nutzung}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Layout ────────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">Layout-Tokens</h2>
+        <div class="sg-table">
+          <div class="sg-row sg-row--3 sg-row--head">
+            <span class="text-meta-label">Token</span>
+            <span class="text-meta-label">Wert</span>
+            <span class="text-meta-label">Bedeutung</span>
+          </div>
+          {layout.map((l) => (
+            <div class="sg-row sg-row--3">
+              <p class="text-meta-value">{l.token}</p>
+              <p class="text-meta-value">{l.wert}</p>
+              <p class="text-caption">{l.hinweis}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Raster ────────────────────────────────────────────── */}
+      <section class="sg-block">
+        <h2 class="text-heading-lg">5-Spalten-Raster</h2>
+        <div class="sg-table">
+          <div class="sg-row sg-row--grid sg-row--head">
+            <span class="text-meta-label">Breakpoint</span>
+            <span class="text-meta-label">Nav2</span>
+            <span class="text-meta-label">Content</span>
+            <span class="text-meta-label">Meta Rail</span>
+            <span class="text-meta-label">Row-Gap</span>
+          </div>
+          {raster.map((r) => (
+            <div class="sg-row sg-row--grid">
+              <p class="text-meta-value">{r.bp}</p>
+              <p class="text-caption">{r.nav2}</p>
+              <p class="text-caption">{r.content}</p>
+              <p class="text-caption">{r.meta}</p>
+              <p class="text-meta-value">{r.rowgap}</p>
+            </div>
+          ))}
+        </div>
+        <p class="text-caption sg-note sg-live">Aktuelle Fensterbreite: <span id="sg-vw">—</span></p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .sg-head {
+    display: flex; flex-direction: column; row-gap: var(--spacing-012);
+    padding-top: var(--nav-hero-gap); padding-bottom: var(--spacing-080);
+    max-width: 640px;
+  }
+  .sg-block { display: flex; flex-direction: column; row-gap: var(--spacing-024); padding-bottom: var(--spacing-096); }
+  .sg-table { display: flex; flex-direction: column; }
+  .sg-row {
+    display: grid;
+    grid-template-columns: 2fr 1.4fr 1fr 1fr 1.2fr;
+    column-gap: var(--grid-gutter);
+    align-items: baseline;
+    padding-block: var(--spacing-016);
+    border-top: 1px solid var(--primary-100);
+  }
+  .sg-row--3     { grid-template-columns: 1.2fr 2fr 1fr; }
+  .sg-row--color { grid-template-columns: 24px 1.2fr 1fr 2fr; align-items: center; }
+  .sg-row--grid  { grid-template-columns: 0.8fr 1fr 1.4fr 1.4fr 0.6fr; }
+  .sg-row--head  { border-top: none; padding-bottom: var(--spacing-008); }
+  .sg-specimen   { min-width: 0; overflow: hidden; }
+  .sg-swatch     { display: block; width: 24px; height: 24px; border: 1px solid var(--primary-100); }
+  .sg-note       { max-width: 640px; }
+  .sg-probe      { position: absolute; left: -9999px; width: 774px; }
+  @media (max-width: 991px) {
+    .sg-row, .sg-row--3, .sg-row--color, .sg-row--grid {
+      grid-template-columns: 1fr; row-gap: var(--spacing-008);
+    }
+    .sg-row--head { display: none; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var tokens = {
+      '29,29,31': 'text/primary', '52,52,53': 'text/hover', '97,97,98': 'text/muted',
+      '119,119,121': 'text/secondary', '142,142,143': 'text/subtle', '165,165,165': 'text/tertiary',
+      '244,244,244': 'text/inverse', '210,210,210': 'text/inverse-hover', '255,255,255': 'surface/default'
+    };
+    function rgbToHex(rgb) {
+      var m = rgb.match(/\d+/g);
+      if (!m) return rgb;
+      var key = m[0] + ',' + m[1] + ',' + m[2];
+      var hex = '#' + m.slice(0, 3).map(function (n) {
+        return parseInt(n, 10).toString(16).padStart(2, '0');
+      }).join('');
+      return tokens[key] ? tokens[key] + '  ' + hex : hex;
+    }
+
+    // Textstile live auslesen
+    document.querySelectorAll('#sg-type .sg-row[data-sample]').forEach(function (row) {
+      var el = row.querySelector('.sg-specimen > *');
+      if (!el) return;
+      var c = getComputedStyle(el);
+      var fam = c.fontFamily.split(',')[0].replace(/["']/g, '');
+      var w = c.fontWeight === '500' ? 'Medium 500' : 'Regular ' + c.fontWeight;
+      var ls = c.letterSpacing !== 'normal' ? '  ·  ' + c.letterSpacing : '';
+      row.querySelector('[data-field=font]').textContent = fam + '  ' + w;
+      row.querySelector('[data-field=size]').textContent =
+        parseFloat(c.fontSize) + ' / ' + parseFloat(c.lineHeight) + ls;
+      row.querySelector('[data-field=color]').textContent = rgbToHex(c.color);
+    });
+
+    // Abstände am echten Content messen
+    var probe = document.getElementById('sg-probe-content');
+    var target = document.getElementById('sg-measured');
+    if (probe && target) {
+      var label = function (el) {
+        if (el.classList.contains('section-header')) return 'Section Header';
+        if (el.classList.contains('body-block')) return 'Body Block';
+        if (el.tagName === 'H3') return 'H3';
+        if (el.tagName === 'P') return 'Absatz';
+        return el.tagName.toLowerCase();
+      };
+      var kids = Array.prototype.slice.call(probe.children);
+      for (var i = 1; i < kids.length; i++) {
+        var a = kids[i - 1].getBoundingClientRect();
+        var b = kids[i].getBoundingClientRect();
+        var row = document.createElement('div');
+        row.className = 'sg-row sg-row--3';
+        row.innerHTML =
+          '<p class="text-meta-value">' + label(kids[i - 1]) + '</p>' +
+          '<p class="text-caption">' + label(kids[i]) + '</p>' +
+          '<p class="text-meta-value">' + Math.round(b.top - a.bottom) + ' px</p>';
+        target.appendChild(row);
+      }
+    }
+
+    // Fensterbreite anzeigen
+    var vw = document.getElementById('sg-vw');
+    if (vw) {
+      var update = function () { vw.textContent = window.innerWidth + ' px'; };
+      update();
+      window.addEventListener('resize', update);
+    }
+  })();
+</script>

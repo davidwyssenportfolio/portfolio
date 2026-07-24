@@ -24,6 +24,7 @@ ul, ol { padding-left: 1.2em; }
    ============================================================ */
 .text-display    { font-weight: 500; font-size: var(--size-3xl); line-height: var(--line-height-3xl); letter-spacing: var(--letter-spacing-display); color: var(--text-primary); }
 .text-heading-lg { font-weight: 500; font-size: var(--size-xl); line-height: var(--line-height-xl); color: var(--text-primary); }
+.text-intro      { font-weight: 500; font-size: var(--size-xl); line-height: var(--line-height-xl); color: var(--text-primary); }
 .text-heading-sm { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
 .text-body-lg    { font-weight: 400; font-size: var(--size-lg); line-height: var(--line-height-lg); color: var(--text-primary); }
 .text-body       { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
@@ -118,10 +119,14 @@ ul, ol { padding-left: 1.2em; }
 .section-content h3 + .body-block { margin-top: var(--spacing-012); } /* Body Block im H3-Block */
 
 /* Markdown-Elemente im Content erben die Textstile */
-.section-content p  { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
-.section-content h3 { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
-.section-content ul,
-.section-content ol { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+/* Markdown-Elemente im Content erben die Textstile.
+   WICHTIG: nur klassenlose Elemente treffen. Ein blanker Selektor wie
+   `.section-content p` hat höhere Spezifität als `.text-body-title` und
+   würde die Textstil-Klassen der Komponenten überschreiben. */
+.section-content p:not([class])  { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.section-content h3:not([class]) { font-weight: 500; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
+.section-content ul:not([class]),
+.section-content ol:not([class]) { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
 /* Listenpunkte ohne Zusatzabstand — das Design System definiert nur den
    Abstand Titel→Liste (12). Ein Item-Gap wäre eine Erfindung. */
 
