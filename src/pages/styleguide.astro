@@ -201,6 +201,10 @@ const raster = [
           </figure>
         </div>
 
+        <div class="sg-live" id="sg-live">
+          <span class="text-meta-value" id="sg-live-text">Messung startet…</span>
+        </div>
+
         <div class="sg-table" id="sg-messung">
           <div class="sg-row sg-row--mess sg-row--head">
             <span class="text-meta-label">Beziehung</span>
@@ -298,6 +302,11 @@ const raster = [
   .sg-row--color { grid-template-columns: 24px 1.2fr 1fr 2fr; align-items: center; }
   .sg-row--grid  { grid-template-columns: 0.8fr 1fr 1.4fr 1.4fr 0.6fr; }
   .sg-row--mess  { grid-template-columns: 2.4fr 0.5fr 0.5fr 0.8fr; }
+  .sg-live {
+    padding: var(--spacing-012) var(--spacing-016);
+    background: var(--primary-050);
+    border-left: 3px solid var(--text-primary);
+  }
   .sg-row--abweichung { background: var(--primary-050); }
   .sg-row--abweichung p:last-child { color: var(--text-primary); font-weight: 500; }
   .sg-row--head  { border-top: none; padding-bottom: var(--spacing-008); }
@@ -344,11 +353,15 @@ const raster = [
       row.querySelector('[data-field=color]').textContent = rgbToHex(c.color);
     });
 
-    // Soll gegen Ist messen
-    var tabelle = document.getElementById('sg-messung');
-    if (tabelle) {
+    // Soll gegen Ist messen — läuft bei jedem Laden UND bei jeder Fensteränderung,
+    // weil sich Sollwerte je nach Breakpoint ändern (Meta Rail, Gutter).
+    function messen() {
+      var tabelle = document.getElementById('sg-messung');
+      if (!tabelle) return;
       var A = document.querySelector('[data-probe=a]');
       var B = document.querySelector('[data-probe=b]');
+      if (!A || !B) return;
+
       var kids = function (el) { return Array.prototype.slice.call(el.children); };
       var abstand = function (a, b) {
         var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
@@ -380,8 +393,6 @@ const raster = [
       var meta = document.querySelector('[data-probe=meta]');
       if (meta && meta.children.length > 1) {
         var mk = kids(meta);
-        // Die Meta Rail wechselt die Richtung: ab 1280 vertikal mit rail-item-gap,
-        // darunter horizontal mit dem Gutter. Entsprechend wird gemessen.
         var senkrecht = getComputedStyle(meta).flexDirection === 'column';
         var gutter = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-gutter')) || 32;
         var r0 = mk[0].getBoundingClientRect(), r1 = mk[1].getBoundingClientRect();
@@ -394,6 +405,11 @@ const raster = [
       }
       var card = document.querySelector('[data-probe=card]');
       if (card) pruefungen.push(['Image Card — Bild → Bildlegende', 16, innen(card)]);
+
+      // Tabelle neu aufbauen, Kopfzeile behalten
+      var kopf = tabelle.querySelector('.sg-row--head');
+      tabelle.innerHTML = '';
+      if (kopf) tabelle.appendChild(kopf);
 
       pruefungen.forEach(function (z) {
         var name = z[0], soll = z[1], ist = z[2];
@@ -409,6 +425,30 @@ const raster = [
         tabelle.appendChild(row);
       });
     }
+
+    // Sichtbarer Beweis, dass neu gemessen wird: Breite, Breakpoint, Zähler
+    var zaehler = 0;
+    function anzeigeAktualisieren() {
+      var el = document.getElementById('sg-live-text');
+      if (!el) return;
+      var w = window.innerWidth;
+      var bp = w >= 1920 ? '1920+' : w >= 1440 ? '1440–1919' : w >= 1280 ? '1280–1439'
+             : w >= 992 ? '992–1279' : w >= 768 ? '768–991' : w >= 480 ? '480–767' : 'unter 480';
+      var gutter = getComputedStyle(document.documentElement).getPropertyValue('--grid-gutter').trim();
+      var marge = getComputedStyle(document.documentElement).getPropertyValue('--page-margin').trim();
+      zaehler++;
+      el.textContent = 'Fensterbreite ' + w + ' px  ·  Breakpoint ' + bp +
+        '  ·  Gutter ' + gutter + '  ·  Margin ' + marge + '  ·  Messung Nr. ' + zaehler;
+    }
+
+    function messenUndAnzeigen() { messen(); anzeigeAktualisieren(); }
+
+    messenUndAnzeigen();
+    var timer;
+    window.addEventListener('resize', function () {
+      clearTimeout(timer);
+      timer = setTimeout(messenUndAnzeigen, 150);
+    });
 
     // Fensterbreite anzeigen
     var vw = document.getElementById('sg-vw');
