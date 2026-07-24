@@ -1,28 +1,31 @@
 ---
-const contact = {
-  address: ['David Wyssen', 'Schweiz'],
-  reach: ['hallo@davidwyssen.ch'],
-  social: ['LinkedIn', 'Instagram'],
-};
+// 1:1 nach Figma, Footer-Board (Node 367:326 für 1440).
+// Struktur: Spacer 160 → dunkle Fläche (surface/inverse), 72 Padding oben und
+// unten → Container 1312 → zwei Spalten mit Gutter-Abstand.
+// Inhalt verbatim aus dem Board. In Figma ist jeder Kontaktblock ein einzelner
+// Textknoten mit Zeilenumbrüchen; im Code sind es semantische Elemente
+// (address, tel:, mailto:, Links) — gleiche Darstellung, aber nutzbar.
 ---
 <div class="footer-spacer" aria-hidden="true"></div>
 <footer class="footer">
   <div class="container">
     <div class="footer-columns">
       <div class="footer-headline">
-        <p class="text-display">Hallo — sprechen wir über Ihr Projekt.</p>
+        <p class="text-display">Hallo…</p>
       </div>
       <div class="footer-contact">
-        <div>
-          {contact.address.map((line) => <p class="text-heading-lg">{line}</p>)}
+        <address class="footer-item">
+          <span class="text-heading-lg">Speicherstrasse 42</span>
+          <span class="text-heading-lg">9000 St. Gallen</span>
+          <span class="text-heading-lg">Schweiz</span>
+        </address>
+        <div class="footer-item">
+          <a class="text-heading-lg footer-link" href="tel:+41797455754">+41 79 745 57 54</a>
+          <a class="text-heading-lg footer-link" href="mailto:hi@davidwyssen.ch">hi@davidwyssen.ch</a>
         </div>
-        <div>
-          {contact.reach.map((line) => (
-            <p class="text-heading-lg"><a class="footer-link" href={`mailto:${line}`}>{line}</a></p>
-          ))}
-        </div>
-        <div>
-          {contact.social.map((line) => <p class="text-heading-lg"><a class="footer-link" href="#">{line}</a></p>)}
+        <div class="footer-item">
+          <a class="text-heading-lg footer-link" href="https://www.linkedin.com/" rel="noopener">Linkedin</a>
+          <a class="text-heading-lg footer-link" href="https://www.behance.net/" rel="noopener">Behance</a>
         </div>
       </div>
     </div>
