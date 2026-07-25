@@ -141,21 +141,28 @@ Blöcke als direkte Kinder von `.section-content`, echte `h3`-Elemente, und die
 Klassen `.section-header` / `.body-block` / `.list-block`. Alles andere ist frei.
 Abstände kommen NIE aus dem Content — nur aus den Nachbarschaftsregeln.
 
-**Nav2 sticky (page-weit):** Die Rail klebt über die GANZE Seite bei **64px** von
-oben, nicht nur in der ersten Section. Trick: `.nav2-rail` liegt `position:absolute;
-inset:0` über die volle `.content`-Höhe (`.content{position:relative}`) mit einem
-5-Spalten-Grid deckungsgleich zu den Sections; `.nav2` sitzt in Spalte 1 und ist
-`position:sticky; top:64px`. `pointer-events:none` auf der Rail, `auto` auf der Nav.
+**Nav2 sticky (page-weit, WebKit-robust):** Die Rail klebt über die GANZE Seite bei
+**64px** von oben. `.nav2-rail` liegt `position:absolute; inset:0` über die volle
+`.content`-Höhe (`.content{position:relative}`); die Nav ist ein **einfacher Block**
+(`width: calc((100% - 4·gutter)/5)` = Spalte 1), `position:sticky; top:64px`. Bewusst
+**kein Grid-Item-Sticky** — das kappt Safari/WebKit auf die Grid-Area. `pointer-events:
+none` auf der Rail, `auto` auf der Nav.
+
+**Anker-Sprünge:** `.section` hat `scroll-margin-top: 96px` (64 Sticky + 32 Luft), damit
+Klick UND direkte `#section`-URLs die Section-Oberkante bei 96px landen. Der Klick nutzt
+explizites `window.scrollTo` (kein `scrollIntoView` → keine Safari-Quirks), setzt den
+geklickten Anker sofort aktiv und stummt den Scrollspy kurz (kein Zurückspringen).
 
 **Nav2-Verhalten (Client-Script in `CaseStudyLayout.astro`, rein statisch):**
-Scrollspy setzt `is-active` auf den aktiven Anker (IntersectionObserver, dünnes Band
-GENAU auf der Sticky-Linie 64px → Anker aktiv, sobald die Section-Oberkante 64px
-erreicht; aktiv nur bei Eintritt → bleibt in Bild-Lücken stehen). `#nav2-end-sentinel`
-am Ende von `.container` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet
-Nav2 aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band (64px..64+Höhe)
-durchläuft — Auslöser über die Klasse/Struktur (`.content > figure.image-card` =
-imageFull, `.content > .image-row-half` = imagePair), NICHT `.image-row` (imageColumn,
-eingerückt). Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei.
+Scrollspy setzt `is-active` (IntersectionObserver, dünnes Band auf 64px). Aktiv =
+unterste Section, die das Band schneidet; `recompute()` läuft bei jedem Callback (kein
+Race mit dem Seitenende), leeres Band (Bild-Lücke) behält die vorherige Markierung.
+`#nav2-end-sentinel` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet Nav2
+aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band durchläuft — mit **32px-
+Puffer** oben/unten (blendet 32px vor Kontakt aus, 32px nach Verlassen ein). Auslöser
+über Klasse/Struktur (`.content > figure.image-card` = imageFull, `.content >
+.image-row-half` = imagePair), NICHT `.image-row` (imageColumn). Unter 992px ist die Rail
+per CSS aus; das Script bleibt fehlerfrei.
 
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
 Pflichtfelder brechen den Build ab, das ist Absicht.

@@ -63,7 +63,19 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    // Klick auf Anker: sanft scrollen, reduced-motion -> ohne Animation.
+    // Sticky-Linie (muss zum CSS `top` der Nav passen, 64px) und Anker-Offset:
+    // 64 Sticky + 32 Luft = 96px. Muss zu scroll-margin-top der Sections passen.
+    const STICK = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-064'), 10) || 64;
+    const OFFSET = STICK + 32;
+
+    // Scrollspy während eines Klick-Sprungs stummschalten, sonst springt die
+    // Markierung auf eine durchquerte Section zurück.
+    let suppressSpy = false;
+    let suppressT;
+
+    // Klick auf Anker: EXPLIZIT scrollen (kein scrollIntoView -> keine Safari-Quirks),
+    // Section-Oberkante landet bei OFFSET (96px). reduced-motion -> ohne Animation.
+    // Geklickter Anker wird sofort aktiv.
     for (const a of links) {
       a.addEventListener('click', (e) => {
         const href = a.getAttribute('href');
@@ -71,7 +83,12 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
         const target = document.querySelector(href);
         if (!target) return;
         e.preventDefault();
-        target.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
+        setActive(a);
+        suppressSpy = true;
+        clearTimeout(suppressT);
+        suppressT = setTimeout(() => { suppressSpy = false; }, reduce.matches ? 60 : 700);
+        const y = target.getBoundingClientRect().top + window.scrollY - OFFSET;
+        window.scrollTo({ top: y, behavior: reduce.matches ? 'auto' : 'smooth' });
         history.replaceState(null, '', href);
       });
     }
@@ -95,34 +112,48 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
       activeLink = link;
     };
     setActive(links[0]); // Default: erster Anker
+    // Direkte #section-URL: passenden Anker sofort aktiv.
+    if (location.hash) {
+      const l = links.find((a) => a.getAttribute('href') === location.hash);
+      if (l) setActive(l);
+    }
 
-    // Sticky-Linie: muss zum CSS `top` der Nav passen (64px). Auslöselinie des
-    // Scrollspy und Nav-Band liegen damit exakt dort, wo die Nav klebt.
-    const STICK = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-064'), 10) || 64;
+    // Aktiv-Auswahl robust: Set der Sections, die das ⅓... 64px-Band schneiden.
+    // recompute() läuft bei JEDEM Callback (Spy + Sentinel) -> kein Race mit atEnd.
+    // Leeres Set (Bild-Lücke zwischen Sections) -> vorherige Markierung behalten.
+    const inBand = new Set();
+    const recompute = () => {
+      if (suppressSpy) return;
+      if (atEnd) { setActive(links[links.length - 1]); return; }
+      if (inBand.size === 0) return;
+      let best = null, bestIdx = -1;
+      for (const s of inBand) { const i = sections.indexOf(s); if (i > bestIdx) { bestIdx = i; best = s; } }
+      if (best) setActive(linkForSection.get(best));
+    };
 
-    // Dünnes Band GENAU auf der Sticky-Linie (64px). Ein Anker wird aktiv, sobald
-    // die OBERKANTE seiner Section die 64px-Linie erreicht. Aktiv NUR bei Eintritt
-    // setzen (beim Austritt nicht löschen) -> in Bild-Lücken bleibt die Markierung.
+    // Dünnes Band GENAU auf der Sticky-Linie (64px): ein Anker wird aktiv, sobald
+    // die Oberkante seiner Section die 64px-Linie erreicht.
     let spy = null;
     const buildSpy = () => {
       if (spy) spy.disconnect();
       const bottom = Math.max(0, window.innerHeight - STICK - 2); // 2px-Band bei 64
       spy = new IntersectionObserver((entries) => {
-        if (atEnd) return;
         for (const entry of entries) {
-          if (entry.isIntersecting) setActive(linkForSection.get(entry.target));
+          if (entry.isIntersecting) inBand.add(entry.target);
+          else inBand.delete(entry.target);
         }
+        recompute();
       }, { rootMargin: `-${STICK}px 0px -${bottom}px 0px`, threshold: 0 });
       for (const s of sections) spy.observe(s);
     };
     buildSpy();
 
-    // Seitenende: letzter Anker aktiv, überschreibt den Band-Scrollspy.
+    // Seitenende: letzter Anker aktiv.
     const sentinel = document.getElementById('nav2-end-sentinel');
     if (sentinel) {
       new IntersectionObserver((entries) => {
         atEnd = entries[0].isIntersecting;
-        if (atEnd) setActive(links[links.length - 1]);
+        recompute();
       }, { threshold: 0 }).observe(sentinel);
     }
 
@@ -140,16 +171,20 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
       if (coverObs) coverObs.disconnect();
       covering.clear();
       if (!coverers.length) { applyHidden(); return; }
-      // Band = vertikaler Bereich der sticky Nav2 (64px .. 64px + Nav-Höhe).
+      // Band = vertikaler Bereich der sticky Nav2 (64 .. 64 + Nav-Höhe), oben UND
+      // unten um 32px Puffer erweitert: ausblenden schon 32px vor Bildkontakt,
+      // einblenden erst 32px nachdem das Bild den Bereich verlassen hat.
+      const BUF = 32;
       const navH = nav.offsetHeight || 0;
-      const bottom = Math.max(0, window.innerHeight - STICK - navH);
+      const top = Math.max(0, STICK - BUF);
+      const bottom = Math.max(0, window.innerHeight - STICK - navH - BUF);
       coverObs = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) covering.add(entry.target);
           else covering.delete(entry.target);
         }
         applyHidden();
-      }, { rootMargin: `-${STICK}px 0px -${bottom}px 0px`, threshold: 0 });
+      }, { rootMargin: `-${top}px 0px -${bottom}px 0px`, threshold: 0 });
       for (const c of coverers) coverObs.observe(c);
     };
     buildCover();
