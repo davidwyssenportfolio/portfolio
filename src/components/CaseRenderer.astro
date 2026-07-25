@@ -22,6 +22,14 @@ import ImageRowHalf from './ImageRowHalf.astro';
 const { blocks = [], meta = [], anchors = [] } = Astro.props;
 const isImage = (t) => t === 'imageFull' || t === 'imageColumn' || t === 'imagePair';
 
+// Gerenderte Bildbreite je Bildtyp (Hinweis fürs srcset — Container max 1312,
+// Page-Margin 64 / 24, Gutter 32 / 24). Mobil greift so eine kleine Variante.
+const SIZES = {
+  full: '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 128px), calc(100vw - 48px)',
+  column: '(min-width: 1312px) 720px, (min-width: 992px) 66vw, (min-width: 768px) calc(100vw - 128px), calc(100vw - 48px)',
+  half: '(min-width: 1312px) 576px, (min-width: 768px) calc((100vw - 160px) / 2), calc((100vw - 72px) / 2)',
+};
+
 // Keystatic-Form { discriminant, value } -> flaches { type, ...value }.
 const items = blocks.map((b) => ({ type: b.discriminant, ...b.value }));
 
@@ -45,15 +53,15 @@ flush();
 ---
 {groups.map((g) => g.kind === 'image' ? (
   g.block.type === 'imageFull' ? (
-    <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} />
+    <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} sizes={SIZES.full} />
   ) : g.block.type === 'imageColumn' ? (
     <ImageRow card>
-      <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} />
+      <ImageCard src={g.block.src} alt={g.block.alt} caption={g.block.caption} sizes={SIZES.column} />
     </ImageRow>
   ) : (
     <ImageRowHalf>
-      <ImageCard src={g.block.left.src} alt={g.block.left.alt} caption={g.block.left.caption} />
-      <ImageCard src={g.block.right.src} alt={g.block.right.alt} caption={g.block.right.caption} />
+      <ImageCard src={g.block.left.src} alt={g.block.left.alt} caption={g.block.left.caption} sizes={SIZES.half} />
+      <ImageCard src={g.block.right.src} alt={g.block.right.alt} caption={g.block.right.caption} sizes={SIZES.half} />
     </ImageRowHalf>
   )
 ) : (

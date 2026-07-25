@@ -1,9 +1,31 @@
 ---
 // Bild + optionale Caption — gap 16. Breite definiert, Höhe frei.
-import { url } from '../lib/url';
-const { src, alt = '', caption } = Astro.props;
+// Raster wird von astro:assets in AVIF/WebP (+ Fallback) und responsive Grössen
+// optimiert; SVG läuft als Passthrough. Bildpfade zeigen auf src/assets/img und
+// werden über resolveImage() zur ImageMetadata aufgelöst.
+import { Image, Picture } from 'astro:assets';
+import { resolveImage, IMAGE_WIDTHS } from '../lib/images';
+const { src, alt = '', caption, sizes = '100vw' } = Astro.props;
+const meta = resolveImage(src);
+const svg = meta?.format === 'svg';
 ---
 <figure class="image-card">
-  <img src={url(src)} alt={alt} loading="lazy" />
+  {meta ? (
+    svg ? (
+      <Image src={meta} alt={alt} loading="lazy" style="width:100%; height:auto" />
+    ) : (
+      <Picture
+        src={meta}
+        formats={['avif', 'webp']}
+        widths={IMAGE_WIDTHS}
+        sizes={sizes}
+        alt={alt}
+        loading="lazy"
+        style="width:100%; height:auto"
+      />
+    )
+  ) : (
+    <img src={src} alt={alt} loading="lazy" />
+  )}
   {caption && <figcaption class="text-caption">{caption}</figcaption>}
 </figure>

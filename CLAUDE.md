@@ -39,6 +39,7 @@ zwischen Figma-Abstand und Spec gilt die **Spec**, nicht das Board.
 src/styles/tokens.css     Tokens 1:1 aus Figma, px-basiert
 src/styles/global.css     Layout-Klassen, Textstile, Content-Rhythmus
 src/lib/url.ts            Pfad-Helfer (base-fest) — PFLICHT für alle internen Pfade
+src/lib/images.ts         Löst Bildpfade (src/assets/img) via import.meta.glob zu ImageMetadata
 src/components/           Blockbibliothek, je eine responsive Komponente
 src/components/CaseRenderer.astro  Baut aus der Blockliste die Sections (Marker + Bild-Split)
 src/components/BlockContent.astro  Ein Block -> exakt die bekannten DOM-Elemente
@@ -48,7 +49,7 @@ src/content/cases/*.yaml  Content als Datendateien, validiert gegen src/content.
 src/pages/index.astro     Homepage-Galerie (16:9)
 src/pages/work/[slug].astro  Case-Route (baut komplett aus entry.data, kein render())
 keystatic.config.ts       Lokales CMS (Schema-Spiegel der 9 Blöcke) — nur `npm run cms`
-public/img/               Bilder
+src/assets/img/<slug>/    Case-Bilder (auch Keystatic-Uploads) — von astro:assets optimiert
 public/fonts/             Graphik woff2 — per .gitignore NICHT im Repo (Lizenz)
 ```
 
@@ -85,7 +86,12 @@ dokumentierter offener Punkt).
 
 **5. Bilder: Breite definiert, Höhe frei.** Auf Detailseiten nie ein
 Seitenverhältnis erzwingen — `width: 100%; height: auto`. Einzige Ausnahme:
-Homepage-Galerie mit 16:9.
+Homepage-Galerie mit 16:9. Optimierung läuft über `astro:assets`: Raster als
+`<Picture>` (AVIF/WebP + Fallback, responsive Breiten = Board-Breiten), SVG als
+`<Image>` (Passthrough). Der `<picture>`-Wrapper ist per `picture{display:contents}`
+layout-transparent, damit die Selektoren greifen. Bildpfade werden NICHT über
+`url()` gebaut, sondern über `resolveImage()` (`src/lib/images.ts`) aufgelöst —
+astro:assets setzt die base selbst.
 
 **6. Content-Rhythmus über Nachbarschaft, nicht über Wrapper.**
 In `.section-content`: 16px zwischen fortlaufenden Absätzen, 24px vor
@@ -156,8 +162,12 @@ Text/Bilder in Formularfeldern. Schreibt direkt die YAML-Dateien im Repo
   läuft deshalb OHNE base. Der normale `npm run dev` und der Prod-Build behalten
   `base '/portfolio'` und laden Keystatic **nicht** — der GitHub-Pages-Build bleibt
   rein statisch (verifiziert: `npm run build` erzeugt nur HTML).
-- **Bildfelder** sind aktuell reine Pfad-Textfelder (Bilder liegen unverändert in
-  `public/img/`). Echte Bildverarbeitung/Upload ist ein bewusst nachgelagerter Schritt.
+- **Bilder-Upload:** Bildfelder sind `fields.image` mit `directory: src/assets/img`,
+  `publicPath: /src/assets/img`. Keystatic legt Uploads pro Case unter
+  `src/assets/img/<slug>/` ab (den Slug hängt es selbst an) und speichert den Pfad
+  im YAML. Beim Build optimiert `astro:assets` sie (AVIF/WebP, responsive Grössen).
+  Ablauf: Bild in Keystatic ziehen → landet in `src/assets/img/<slug>/` → nach Push
+  optimiert live. Kein manuelles Pfad-Anfassen. (SVG-Platzhalter bleiben SVG.)
 - **Section-Trenner:** Der `newSection`-Marker wird in der Blockliste als
   Volllinien-Trenner dargestellt (`itemLabel` gibt `━━━ SECTION: <anchor> ━━━`
   zurück), damit die Sections optisch getrennt sind.

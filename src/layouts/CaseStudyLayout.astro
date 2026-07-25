@@ -5,9 +5,12 @@
 import BaseLayout from './BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { url } from '../lib/url';
+import { Image, Picture } from 'astro:assets';
+import { resolveImage, IMAGE_WIDTHS } from '../lib/images';
 const { entry } = Astro.props;
 const d = entry.data;
+const hero = resolveImage(d.heroImage);
+const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 128px), calc(100vw - 48px)';
 ---
 <BaseLayout title={`${d.title} — David Wyssen`} description={d.intro}>
   <div class="page">
@@ -24,7 +27,13 @@ const d = entry.data;
             <p class="text-intro">{d.intro}</p>
           </div>
         </div>
-        <img src={url(d.heroImage)} alt={d.heroAlt} />
+        {hero ? (
+          hero.format === 'svg' ? (
+            <Image src={hero} alt={d.heroAlt} style="width:100%; height:auto" />
+          ) : (
+            <Picture src={hero} formats={['avif', 'webp']} widths={IMAGE_WIDTHS} sizes={heroSizes} alt={d.heroAlt} style="width:100%; height:auto" />
+          )
+        ) : null}
       </header>
       <main class="content">
         <slot />

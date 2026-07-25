@@ -11,8 +11,14 @@ import { config, fields, collection } from '@keystatic/core';
 //  - Bildfelder sind aktuell reine Pfad-Textfelder (Bilder liegen in public/img).
 //    Echte Bildverarbeitung/Upload ist ein bewusst nachgelagerter Schritt.
 
+// Bilder landen unter src/assets/img, damit astro:assets sie zur Build-Zeit
+// optimiert (AVIF/WebP, responsive Grössen). publicPath ist der Präfix, der im
+// YAML gespeichert wird; der Renderer löst ihn über import.meta.glob auf.
+const imageField = (label: string) =>
+  fields.image({ label, directory: 'src/assets/img', publicPath: '/src/assets/img' });
+
 const imageFields = () => ({
-  src: fields.text({ label: 'Bildpfad', description: 'Relativ, liegt in public/ — z. B. img/gc-01.svg' }),
+  src: imageField('Bild'),
   alt: fields.text({ label: 'Alt-Text' }),
   caption: fields.text({ label: 'Bildlegende', multiline: true }),
 });
@@ -40,9 +46,9 @@ export default config({
         overline: fields.text({ label: 'Overline (Hero)' }),
         subtitle: fields.text({ label: 'Subtitle (Hero)' }),
         intro: fields.text({ label: 'Intro (Hero)', multiline: true, validation: { isRequired: true } }),
-        heroImage: fields.text({ label: 'Hero-Bild (Pfad)', description: 'z. B. img/gc-hero.svg' }),
+        heroImage: imageField('Hero-Bild'),
         heroAlt: fields.text({ label: 'Hero Alt-Text' }),
-        cover: fields.text({ label: 'Cover Startseite 16:9 (Pfad)' }),
+        cover: imageField('Cover Startseite (16:9)'),
         coverAlt: fields.text({ label: 'Cover Alt-Text' }),
         order: fields.integer({ label: 'Reihenfolge', defaultValue: 0 }),
         draft: fields.checkbox({ label: 'Entwurf', defaultValue: false }),
@@ -113,9 +119,9 @@ export default config({
                 case 'h3': return `H3 — ${preview(v.fields.title.value)}`;
                 case 'bodyBlock': return `BODY BLOCK — ${preview(v.fields.title.value)}`;
                 case 'listBlock': return `LIST BLOCK — ${preview(v.fields.title.value)}`;
-                case 'imageFull': return `BILD VOLL — ${preview(v.fields.caption.value) || v.fields.src.value}`;
-                case 'imageColumn': return `BILD TEXTSPALTE — ${preview(v.fields.caption.value) || v.fields.src.value}`;
-                case 'imagePair': return `ZWEI BILDER — ${v.fields.left.fields.src.value} | ${v.fields.right.fields.src.value}`;
+                case 'imageFull': return `BILD VOLL — ${preview(v.fields.caption.value) || 'Bild'}`;
+                case 'imageColumn': return `BILD TEXTSPALTE — ${preview(v.fields.caption.value) || 'Bild'}`;
+                case 'imagePair': return `ZWEI BILDER — ${preview(v.fields.left.fields.caption.value) || 'links'} | ${preview(v.fields.right.fields.caption.value) || 'rechts'}`;
                 default: return String(props.discriminant);
               }
             },

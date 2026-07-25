@@ -4,9 +4,9 @@ title: Pilot Case Study
 overline: Digital Product
 subtitle: Design System & Responsive Build
 intro: "Platzhalter-Intro für den Pilot-Case. Zwei bis drei Sätze, die das Projekt einordnen — Aufgabe, Kontext, Ergebnis. Der Text füllt die zweite Hero-Spalte und beginnt mit dem 4px-Offset auf Höhe des Titels."
-heroImage: img/hero-pilot.svg
+heroImage: /src/assets/img/pilot/hero-pilot.svg
 heroAlt: Hero-Platzhalter
-cover: img/cover-pilot.svg
+cover: /src/assets/img/pilot/cover-pilot.svg
 coverAlt: Cover Pilot Case
 order: 1
 draft: false
@@ -51,7 +51,7 @@ blocks:
 
   # Bild volle Breite zwischen zwei Sections (schliesst Überblick, .content-Ebene).
   - discriminant: imageFull
-    value: { src: img/full-01.svg, alt: "", caption: "Volle Content-Breite — Bildblöcke sind Geschwister der Sections, nicht Teil der Textspalte." }
+    value: { src: /src/assets/img/pilot/full-01.svg, alt: "", caption: "Volle Content-Breite — Bildblöcke sind Geschwister der Sections, nicht Teil der Textspalte." }
 
   # ── Prozess ───────────────────────────────────────────────────────
   - discriminant: newSection
@@ -66,11 +66,11 @@ blocks:
       text: "Zwischen zwei Sections liegen 40px, zwischen Section und Bildblock 32px — beides über den Content-Fluss geregelt."
 
   - discriminant: imageColumn
-    value: { src: img/card-01.svg, alt: "", caption: "Karte auf der Textspalte — folgt dem 3/4-Spalten-Mass des Contents." }
+    value: { src: /src/assets/img/pilot/card-01.svg, alt: "", caption: "Karte auf der Textspalte — folgt dem 3/4-Spalten-Mass des Contents." }
   - discriminant: imagePair
     value:
-      left:  { src: img/half-01.svg, alt: "", caption: "Zwei nebeneinander." }
-      right: { src: img/half-02.svg, alt: "", caption: "Die Zeile kollabiert an keinem Breakpoint — auch bei 480 bleiben es zwei Spalten." }
+      left:  { src: /src/assets/img/pilot/half-01.svg, alt: "", caption: "Zwei nebeneinander." }
+      right: { src: /src/assets/img/pilot/half-02.svg, alt: "", caption: "Die Zeile kollabiert an keinem Breakpoint — auch bei 480 bleiben es zwei Spalten." }
 
   # ── Ergebnis ──────────────────────────────────────────────────────
   - discriminant: newSection

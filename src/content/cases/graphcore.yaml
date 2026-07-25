@@ -3,9 +3,9 @@ subtitle: Brand Identity, Digital Design
 intro: >-
   Visual identity, dynamic typeface and pattern generator for a machine learning
   hardware start-up. 3 Zeile zum anschauen.
-heroImage: img/gc-hero.svg
+heroImage: /src/assets/img/graphcore/gc-hero.svg
 heroAlt: ''
-cover: img/gc-cover.svg
+cover: /src/assets/img/graphcore/gc-cover.svg
 coverAlt: Graphcore
 order: 0
 draft: false
@@ -191,21 +191,21 @@ blocks:
           future sectors and industries.
   - discriminant: imageColumn
     value:
-      src: img/gc-01.svg
+      src: /src/assets/img/graphcore/gc-01.svg
       caption: >-
         Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
         technology start-up with the ambitious mission of creating a future
         where.
   - discriminant: imageColumn
     value:
-      src: img/gc-02.svg
+      src: /src/assets/img/graphcore/gc-02.svg
       caption: >-
         Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
         technology start-up with the ambitious mission of creating a future
         where.
   - discriminant: imageFull
     value:
-      src: img/gc-03.svg
+      src: /src/assets/img/graphcore/gc-03.svg
       caption: >-
         Caption. Based in Bristol (UK) and Palo Alto (US), Graphcore is a
         technology start-up with the ambitious mission of creating a future
@@ -213,9 +213,9 @@ blocks:
   - discriminant: imagePair
     value:
       left:
-        src: img/gc-04.svg
+        src: /src/assets/img/graphcore/gc-04.svg
       right:
-        src: img/gc-05.svg
+        src: /src/assets/img/graphcore/gc-05.svg
   - discriminant: imageFull
     value:
-      src: img/gc-06.svg
+      src: /src/assets/img/graphcore/gc-06.svg

@@ -3,9 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { url } from '../lib/url';
+import { Image, Picture } from 'astro:assets';
+import { resolveImage, IMAGE_WIDTHS } from '../lib/images';
 import { getCollection } from 'astro:content';
 const cases = (await getCollection('cases', ({ data }) => !data.draft))
   .sort((a, b) => a.data.order - b.data.order);
+const gallerySizes = '(min-width: 1280px) calc((min(100vw, 1312px) - 160px) / 2), calc(100vw - 48px)';
 // Galerie-Zeilen: ab 1280 zwei Spalten -> paarweise gruppieren
 const rows = [];
 for (let i = 0; i < cases.length; i += 2) rows.push(cases.slice(i, i + 2));
@@ -21,7 +24,14 @@ for (let i = 0; i < cases.length; i += 2) rows.push(cases.slice(i, i + 2));
       <div class="home-gallery-row">
         {row.map((c) => (
           <a class="home-gallery-item" href={url(`work/${c.id}`)} aria-label={c.data.title}>
-            <img src={url(c.data.cover ?? c.data.heroImage)} alt={c.data.coverAlt || c.data.title} loading="lazy" />
+            {(() => {
+              const cover = resolveImage(c.data.cover || c.data.heroImage);
+              const alt = c.data.coverAlt || c.data.title;
+              if (!cover) return null;
+              return cover.format === 'svg'
+                ? <Image src={cover} alt={alt} loading="lazy" />
+                : <Picture src={cover} formats={['avif', 'webp']} widths={IMAGE_WIDTHS} sizes={gallerySizes} alt={alt} loading="lazy" />;
+            })()}
           </a>
         ))}
       </div>

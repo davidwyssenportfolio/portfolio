@@ -145,6 +145,10 @@ ul, ol { padding-left: 1.2em; }
 .image-row-card { grid-column: 2 / 6; }
 .image-row-half { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: var(--grid-gutter); } /* kollabiert nie */
 .image-card     { display: flex; flex-direction: column; row-gap: var(--spacing-016); }
+/* astro:assets <Picture> zieht ein <picture>-Wrapper ein. display:contents macht
+   ihn layout-transparent: das <img> bleibt das effektive Kind, sodass alle
+   Selektoren (.image-card-Gap, .home-gallery-item img, .content > figure) greifen. */
+picture { display: contents; }
 
 /* ============================================================
    >= 1280 — Content 3 Spalten, Meta-Rail rechts vertikal
