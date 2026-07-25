@@ -158,54 +158,45 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
       new IntersectionObserver((entries) => {
         atEnd = entries[0].isIntersecting;
         recompute();
-        applyHidden(); // Nav am Seitenende sichtbar (Sicherheitsnetz)
       }, { threshold: 0 }).observe(sentinel);
     }
 
-    // ---- Teil 2: Nav2 hinter vollbreiten Bildern ausblenden -------------
-    // Auslöser rein über Klasse/Struktur (nicht Laufzeit-Breite):
-    const coverers = Array.from(
-      content.querySelectorAll(':scope > figure.image-card, :scope > .image-row-half'),
-    );
-
-    const covering = new Set();
-    let coverObs = null;
-    // Ausgeblendet, wenn ein vollbreites Bild das Band schneidet — ABER nie am
-    // absoluten Seitenende (atEnd): dort bleibt die Nav sichtbar (Sicherheitsnetz).
-    const applyHidden = () => nav.classList.toggle('nav2--hidden', covering.size > 0 && !atEnd);
-
-    const buildCover = () => {
-      if (coverObs) coverObs.disconnect();
-      covering.clear();
-      if (!coverers.length) { applyHidden(); return; }
-      // ALLE vollbreiten Bilder (imageFull + imagePair) lösen aus. Der Seitenende-
-      // Sonderfall (letztes Bild reicht bis zum Footer -> ließe sich nicht wegscrollen)
-      // wird NICHT über Ausschluss gelöst, sondern über das atEnd-Netz in applyHidden:
-      // am absoluten Seitenende bleibt die Nav sichtbar, sonst hinge sie fest.
-      // Band = Nav-Bereich (64 .. 64 + Nav-Höhe), oben UND unten um NAV_HIDE_BUFFER
-      // erweitert: ausblenden schon davor, einblenden erst danach.
-      const navH = nav.offsetHeight || 0;
-      const top = Math.max(0, STICK - NAV_HIDE_BUFFER);
-      const bottom = Math.max(0, window.innerHeight - STICK - navH - NAV_HIDE_BUFFER);
-      coverObs = new IntersectionObserver((entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) covering.add(entry.target);
-          else covering.delete(entry.target);
-        }
-        applyHidden();
-      }, { rootMargin: `-${top}px 0px -${bottom}px 0px`, threshold: 0 });
-      for (const c of coverers) coverObs.observe(c);
+    // ---- Teil 2: Nav2 ausblenden, wenn ein vollbreites Bild die Nav-Spalte überdeckt.
+    // rAF-gedrosselte Scroll-Schleife, pro Frame SYNCHRON (kein IntersectionObserver ->
+    // keine IO-Latenz, daher kein "zu spät"). Auslöser rein über GEOMETRIE:
+    //   - Referenz ist die sichtbare sticky Nav (`.nav2`), NICHT die volle Rail.
+    //   - Ein Bild zählt, wenn sein Rect horizontal die Nav-Spalte [nav.left..nav.right]
+    //     schneidet UND vertikal in [nav.top - BUFFER, nav.bottom + BUFFER] fällt.
+    // Eingerückte Textspalten-Bilder (beginnen rechts der Nav-Spalte) fallen automatisch
+    // raus; neue Bildtypen funktionieren automatisch. KEIN Seitenende-Sonderfall:
+    // überdeckt ein Bild am Ende die Nav, ist sie ausgeblendet — das ist der Zweck.
+    const imageList = () => Array.from(content.querySelectorAll('img'));
+    let coverImgs = imageList();
+    let coverHidden = null;
+    const updateCover = () => {
+      const n = nav.getBoundingClientRect();
+      const colLeft = n.left, colRight = n.right;
+      const bandTop = n.top - NAV_HIDE_BUFFER, bandBottom = n.bottom + NAV_HIDE_BUFFER;
+      let hit = false;
+      for (const img of coverImgs) {
+        const r = img.getBoundingClientRect();
+        if (!r.width || !r.height) continue;
+        if (r.left < colRight && r.right > colLeft && r.top < bandBottom && r.bottom > bandTop) { hit = true; break; }
+      }
+      if (hit !== coverHidden) { coverHidden = hit; nav.classList.toggle('nav2--hidden', hit); }
     };
-    buildCover();
+    let coverTick = false;
+    const scheduleCover = () => { if (!coverTick) { coverTick = true; requestAnimationFrame(() => { coverTick = false; updateCover(); }); } };
+    window.addEventListener('scroll', scheduleCover, { passive: true });
+    updateCover();
 
-    // Resize -> beide Bänder neu berechnen (kein Scroll-Listener).
+    // Resize -> Scrollspy-Band neu, Bildliste + Cover neu.
     let rt;
     window.addEventListener('resize', () => {
       clearTimeout(rt);
-      rt = setTimeout(() => { buildSpy(); buildCover(); }, 150);
+      rt = setTimeout(() => { buildSpy(); coverImgs = imageList(); updateCover(); }, 150);
     });
-    // Nach vollständigem Laden (finale Höhen/scrollHeight) Cover neu berechnen,
-    // damit der Seitenende-Filter mit der endgültigen Geometrie stimmt.
-    window.addEventListener('load', buildCover);
+    // Nach vollständigem Laden: Bildliste aktualisieren + Cover neu.
+    window.addEventListener('load', () => { coverImgs = imageList(); updateCover(); });
   })();
 </script>

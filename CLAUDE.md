@@ -157,16 +157,24 @@ geklickten Anker sofort aktiv und stummt den Scrollspy kurz (kein Zurückspringe
 Scrollspy setzt `is-active` (IntersectionObserver, dünnes Band auf 64px). Aktiv =
 unterste Section, die das Band schneidet; `recompute()` läuft bei jedem Callback (kein
 Race mit dem Seitenende), leeres Band (Bild-Lücke) behält die vorherige Markierung.
-`#nav2-end-sentinel` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet Nav2
-aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band durchläuft. Auslöser rein
-über Klasse/Struktur: **ALLE** vollbreiten Typen — `.content > figure.image-card` (imageFull)
-UND `.content > .image-row-half` (imagePair) — lösen aus, NICHT das eingerückte
-`.content > .image-row` (imageColumn, beginnt weiter rechts, überlappt die Rail nicht).
-Der Vorlauf ist eine Konstante `NAV_HIDE_BUFFER` oben im Script (aktuell 64px): blendet
-so viel vor Bildkontakt aus und nach Verlassen wieder ein (Band-rootMargin oben/unten
-erweitert). **Seitenende:** Am absoluten Seitenende (`atEnd` via Sentinel) bleibt die Nav
-sichtbar (`applyHidden` respektiert `!atEnd`) — sonst hinge sie hinter einem bis zum Footer
-reichenden Bild fest. Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei.
+`#nav2-end-sentinel` aktiviert am Seitenende den letzten Anker.
+
+**Ausblenden hinter Bildern (`.nav2--hidden`):** Eine **rAF-gedrosselte Scroll-Schleife**,
+pro Frame SYNCHRON (kein IntersectionObserver → keine IO-Latenz, kein „zu spät"). Rein
+über **Geometrie**, nicht über Bildtypen: Referenz ist die sichtbare sticky `.nav2` (NICHT
+die volle `.nav2-rail`, die absolut über die ganze `.content` spannt). Ein `<img>` in
+`.content` zählt, wenn sein Rect horizontal die Nav-Spalte `[nav.left..nav.right]` schneidet
+UND vertikal in `[nav.top − NAV_HIDE_BUFFER, nav.bottom + NAV_HIDE_BUFFER]` fällt. Eingerückte
+Textspalten-Bilder (beginnen rechts der Nav-Spalte) fallen automatisch raus, neue Bildtypen
+funktionieren automatisch. `NAV_HIDE_BUFFER` ist eine Konstante oben im Script (aktuell 64px)
+= Vorlauf vor Kontakt. **Kein Seitenende-Sonderfall:** überdeckt ein Bild am Ende die Nav,
+ist sie ausgeblendet — das ist der Zweck. Unter 992px ist die Rail per CSS aus; das Script
+bleibt fehlerfrei.
+
+Zur Rail-Konstruktion: `.nav2-rail` steht im DOM in der ersten Section, ist aber
+`position:absolute; inset:0` mit `.content` (`position:relative`) als Containing Block —
+spannt also über die GANZE `.content`-Höhe (nicht nur die erste Section). Die `.nav2` darin
+ist `sticky; top:64px`. Deshalb klebt sie page-weit und begegnet allen Bildern.
 
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
 Pflichtfelder brechen den Build ab, das ist Absicht.
