@@ -96,15 +96,26 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     };
     setActive(links[0]); // Default: erster Anker
 
-    // Dünnes Band auf ⅓ Fensterhöhe. Aktiv NUR bei Eintritt setzen
-    // (beim Austritt nicht löschen) -> in Bild-Lücken bleibt die Markierung stehen.
-    const spy = new IntersectionObserver((entries) => {
-      if (atEnd) return;
-      for (const entry of entries) {
-        if (entry.isIntersecting) setActive(linkForSection.get(entry.target));
-      }
-    }, { rootMargin: '-33% 0px -66% 0px', threshold: 0 });
-    for (const s of sections) spy.observe(s);
+    // Sticky-Linie: muss zum CSS `top` der Nav passen (64px). Auslöselinie des
+    // Scrollspy und Nav-Band liegen damit exakt dort, wo die Nav klebt.
+    const STICK = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-064'), 10) || 64;
+
+    // Dünnes Band GENAU auf der Sticky-Linie (64px). Ein Anker wird aktiv, sobald
+    // die OBERKANTE seiner Section die 64px-Linie erreicht. Aktiv NUR bei Eintritt
+    // setzen (beim Austritt nicht löschen) -> in Bild-Lücken bleibt die Markierung.
+    let spy = null;
+    const buildSpy = () => {
+      if (spy) spy.disconnect();
+      const bottom = Math.max(0, window.innerHeight - STICK - 2); // 2px-Band bei 64
+      spy = new IntersectionObserver((entries) => {
+        if (atEnd) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(linkForSection.get(entry.target));
+        }
+      }, { rootMargin: `-${STICK}px 0px -${bottom}px 0px`, threshold: 0 });
+      for (const s of sections) spy.observe(s);
+    };
+    buildSpy();
 
     // Seitenende: letzter Anker aktiv, überschreibt den Band-Scrollspy.
     const sentinel = document.getElementById('nav2-end-sentinel');
@@ -125,31 +136,29 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     let coverObs = null;
     const applyHidden = () => nav.classList.toggle('nav2--hidden', covering.size > 0);
 
-    const buildCoverObserver = () => {
+    const buildCover = () => {
       if (coverObs) coverObs.disconnect();
       covering.clear();
       if (!coverers.length) { applyHidden(); return; }
-      // Band = vertikaler Bereich der sticky Nav2 (top .. top + Höhe).
-      const top = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-024'), 10) || 24;
+      // Band = vertikaler Bereich der sticky Nav2 (64px .. 64px + Nav-Höhe).
       const navH = nav.offsetHeight || 0;
-      const bottom = Math.max(0, window.innerHeight - top - navH);
+      const bottom = Math.max(0, window.innerHeight - STICK - navH);
       coverObs = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) covering.add(entry.target);
           else covering.delete(entry.target);
         }
         applyHidden();
-      }, { rootMargin: `-${top}px 0px -${bottom}px 0px`, threshold: 0 });
+      }, { rootMargin: `-${STICK}px 0px -${bottom}px 0px`, threshold: 0 });
       for (const c of coverers) coverObs.observe(c);
     };
-    buildCoverObserver();
+    buildCover();
 
-    // Resize -> Band neu berechnen (kein Scroll-Listener). Unter 992 ist die Rail
-    // per CSS ausgeblendet; die Klasse schadet dort nicht.
+    // Resize -> beide Bänder neu berechnen (kein Scroll-Listener).
     let rt;
     window.addEventListener('resize', () => {
       clearTimeout(rt);
-      rt = setTimeout(buildCoverObserver, 150);
+      rt = setTimeout(() => { buildSpy(); buildCover(); }, 150);
     });
   })();
 </script>

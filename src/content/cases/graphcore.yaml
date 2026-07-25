@@ -19,14 +19,12 @@ meta:
   - label: Rubrik
     value: Ergebniss
 anchors:
-  - label: Nav2. normal
+  - label: Überblick
     href: '#section-1'
-  - label: Nav2. Active
+  - label: Prozess
     href: '#section-2'
-  - label: Nav2. hover
+  - label: Ergebnis
     href: '#section-3'
-  - label: Nav2. normal
-    href: '#section-1'
 blocks:
   - discriminant: newSection
     value:

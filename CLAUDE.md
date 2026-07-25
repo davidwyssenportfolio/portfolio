@@ -141,13 +141,20 @@ Blöcke als direkte Kinder von `.section-content`, echte `h3`-Elemente, und die
 Klassen `.section-header` / `.body-block` / `.list-block`. Alles andere ist frei.
 Abstände kommen NIE aus dem Content — nur aus den Nachbarschaftsregeln.
 
+**Nav2 sticky (page-weit):** Die Rail klebt über die GANZE Seite bei **64px** von
+oben, nicht nur in der ersten Section. Trick: `.nav2-rail` liegt `position:absolute;
+inset:0` über die volle `.content`-Höhe (`.content{position:relative}`) mit einem
+5-Spalten-Grid deckungsgleich zu den Sections; `.nav2` sitzt in Spalte 1 und ist
+`position:sticky; top:64px`. `pointer-events:none` auf der Rail, `auto` auf der Nav.
+
 **Nav2-Verhalten (Client-Script in `CaseStudyLayout.astro`, rein statisch):**
-Scrollspy setzt `is-active` auf den aktiven Anker (IntersectionObserver, ⅓-Band;
-aktiv nur bei Eintritt → bleibt in Bild-Lücken stehen). `#nav2-end-sentinel` am
-Ende von `.container` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet
-Nav2 aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild die Rail überdeckt — Auslöser
-über die Klasse/Struktur (`.content > figure.image-card` = imageFull,
-`.content > .image-row-half` = imagePair), NICHT `.image-row` (imageColumn,
+Scrollspy setzt `is-active` auf den aktiven Anker (IntersectionObserver, dünnes Band
+GENAU auf der Sticky-Linie 64px → Anker aktiv, sobald die Section-Oberkante 64px
+erreicht; aktiv nur bei Eintritt → bleibt in Bild-Lücken stehen). `#nav2-end-sentinel`
+am Ende von `.container` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet
+Nav2 aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band (64px..64+Höhe)
+durchläuft — Auslöser über die Klasse/Struktur (`.content > figure.image-card` =
+imageFull, `.content > .image-row-half` = imagePair), NICHT `.image-row` (imageColumn,
 eingerückt). Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei.
 
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
