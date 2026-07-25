@@ -167,15 +167,25 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     let coverObs = null;
     const applyHidden = () => nav.classList.toggle('nav2--hidden', covering.size > 0);
 
+    const BUF = 32;
     const buildCover = () => {
       if (coverObs) coverObs.disconnect();
       covering.clear();
-      if (!coverers.length) { applyHidden(); return; }
+      const navH = nav.offsetHeight || 0;
+      // Sonderfall Seitenende: Ein vollbreites Bild blendet die Nav NUR aus, wenn es
+      // sich über die Nav-Linie hinwegscrollen lässt (danach kommt Inhalt). Reicht
+      // das Bild bis ans Seitenende (Unterkante am Max-Scroll noch UNTER der
+      // Band-Oberkante 32px), gibt es kein "Bild vorbei"-Ereignis -> nicht beobachten,
+      // sonst hängt die Nav am Seitenende hinter dem Bild fest. So bleibt sie dort sichtbar.
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const active = coverers.filter((c) => {
+        const docBottom = c.getBoundingClientRect().bottom + window.scrollY;
+        return docBottom - maxScroll <= STICK - BUF; // Bild kann über die Band-Oberkante gescrollt werden
+      });
+      if (!active.length) { applyHidden(); return; }
       // Band = vertikaler Bereich der sticky Nav2 (64 .. 64 + Nav-Höhe), oben UND
       // unten um 32px Puffer erweitert: ausblenden schon 32px vor Bildkontakt,
       // einblenden erst 32px nachdem das Bild den Bereich verlassen hat.
-      const BUF = 32;
-      const navH = nav.offsetHeight || 0;
       const top = Math.max(0, STICK - BUF);
       const bottom = Math.max(0, window.innerHeight - STICK - navH - BUF);
       coverObs = new IntersectionObserver((entries) => {
@@ -185,7 +195,7 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
         }
         applyHidden();
       }, { rootMargin: `-${top}px 0px -${bottom}px 0px`, threshold: 0 });
-      for (const c of coverers) coverObs.observe(c);
+      for (const c of active) coverObs.observe(c);
     };
     buildCover();
 
@@ -195,5 +205,8 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
       clearTimeout(rt);
       rt = setTimeout(() => { buildSpy(); buildCover(); }, 150);
     });
+    // Nach vollständigem Laden (finale Höhen/scrollHeight) Cover neu berechnen,
+    // damit der Seitenende-Filter mit der endgültigen Geometrie stimmt.
+    window.addEventListener('load', buildCover);
   })();
 </script>

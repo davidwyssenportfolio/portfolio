@@ -161,8 +161,11 @@ Race mit dem Seitenende), leeres Band (Bild-Lücke) behält die vorherige Markie
 aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band durchläuft — mit **32px-
 Puffer** oben/unten (blendet 32px vor Kontakt aus, 32px nach Verlassen ein). Auslöser
 über Klasse/Struktur (`.content > figure.image-card` = imageFull, `.content >
-.image-row-half` = imagePair), NICHT `.image-row` (imageColumn). Unter 992px ist die Rail
-per CSS aus; das Script bleibt fehlerfrei.
+.image-row-half` = imagePair), NICHT `.image-row` (imageColumn). **Seitenende-Sonderfall:**
+Ein vollbreites Bild, das bis ans Seitenende reicht (Unterkante am Max-Scroll noch unter
+der Band-Oberkante, also nicht über die Nav-Linie hinwegscrollbar), wird NICHT beobachtet
+— sonst hinge die Nav dahinter fest; so bleibt sie am Seitenende sichtbar. Unter 992px ist
+die Rail per CSS aus; das Script bleibt fehlerfrei.
 
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
 Pflichtfelder brechen den Build ab, das ist Absicht.
