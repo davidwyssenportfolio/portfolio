@@ -92,6 +92,11 @@ In `.section-content`: 16px zwischen fortlaufenden Absätzen, 24px vor
 Überschriften und neuen Topics — umgesetzt mit Sibling-Selektoren in
 `global.css`. Kein `.topic`-Wrapper. Der Content-Flow bleibt dadurch frei.
 
+Ausnahme: **Section Header → H3 liegt bei 16** (der erste Block direkt nach dem
+Section Header ist immer 16), während **Absatz → H3 mitten im Text bei 24 bleibt**
+(neues Topic). Umgesetzt mit `.section-content > .section-header + h3` (höhere
+Spezifität als die 24er-Sammelregel).
+
 ---
 
 ## Case Studies
@@ -153,6 +158,9 @@ Text/Bilder in Formularfeldern. Schreibt direkt die YAML-Dateien im Repo
   rein statisch (verifiziert: `npm run build` erzeugt nur HTML).
 - **Bildfelder** sind aktuell reine Pfad-Textfelder (Bilder liegen unverändert in
   `public/img/`). Echte Bildverarbeitung/Upload ist ein bewusst nachgelagerter Schritt.
+- **Section-Trenner:** Der `newSection`-Marker wird in der Blockliste als
+  Volllinien-Trenner dargestellt (`itemLabel` gibt `━━━ SECTION: <anchor> ━━━`
+  zurück), damit die Sections optisch getrennt sind.
 - **Abnahme nach Content-Änderungen:** `/styleguide` muss weiterhin 0 Abweichungen
   von den gemessenen Beziehungen zeigen (1440 · 992 · 480); der Selektor-Vertrag oben
   ist die Bedingung dafür.
