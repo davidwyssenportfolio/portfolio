@@ -141,6 +141,15 @@ Blöcke als direkte Kinder von `.section-content`, echte `h3`-Elemente, und die
 Klassen `.section-header` / `.body-block` / `.list-block`. Alles andere ist frei.
 Abstände kommen NIE aus dem Content — nur aus den Nachbarschaftsregeln.
 
+**Nav2-Verhalten (Client-Script in `CaseStudyLayout.astro`, rein statisch):**
+Scrollspy setzt `is-active` auf den aktiven Anker (IntersectionObserver, ⅓-Band;
+aktiv nur bei Eintritt → bleibt in Bild-Lücken stehen). `#nav2-end-sentinel` am
+Ende von `.container` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet
+Nav2 aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild die Rail überdeckt — Auslöser
+über die Klasse/Struktur (`.content > figure.image-card` = imageFull,
+`.content > .image-row-half` = imagePair), NICHT `.image-row` (imageColumn,
+eingerückt). Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei.
+
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
 Pflichtfelder brechen den Build ab, das ist Absicht.
 
@@ -207,7 +216,6 @@ beurteilen, nie auf github.io.
 ## Offene Punkte
 
 - Echter Content statt Platzhalter im Pilot-Case
-- Nav2 Scrollspy (Active-State per IntersectionObserver); sticky läuft bereits
 - Custom Cursor portieren — Vanilla-Demo existiert: Dot 16px / Blob 28px bei 35%
   Opazität / Pill mit Label über `data-cursor`-Attribut. Auf Touch deaktivieren.
 - Mobile-Menü (aktuell nur der „Menü"-Trigger)

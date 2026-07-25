@@ -105,6 +105,18 @@ ul, ol { padding-left: 1.2em; }
   display: flex; flex-direction: column;
   row-gap: var(--spacing-016);
   position: sticky; top: var(--spacing-024);
+  /* Einblenden (Standardzustand): ease-in */
+  transition: opacity 0.28s ease-in, transform 0.28s ease-in;
+}
+/* Ausgeblendet, wenn ein vollbreites Bild die Rail überdeckt. Ausblenden: ease-out. */
+.nav2--hidden {
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  transition-timing-function: ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav2 { transition: none; }
 }
 .meta-row { display: flex; flex-direction: column; }        /* gap 0 */
 
