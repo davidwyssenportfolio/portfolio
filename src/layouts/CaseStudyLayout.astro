@@ -68,6 +68,10 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     const STICK = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-064'), 10) || 64;
     const OFFSET = STICK + 32;
 
+    // Vorlauf, mit dem die Nav vor Bildkontakt aus- und nach Verlassen wieder
+    // einblendet. Bei schnellem Scrollen ggf. erhöhen (z. B. 96). Eine Zahl, eine Stelle.
+    const NAV_HIDE_BUFFER = 64;
+
     // Scrollspy während eines Klick-Sprungs stummschalten, sonst springt die
     // Markierung auf eine durchquerte Section zurück.
     let suppressSpy = false;
@@ -154,6 +158,7 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
       new IntersectionObserver((entries) => {
         atEnd = entries[0].isIntersecting;
         recompute();
+        applyHidden(); // Nav am Seitenende sichtbar (Sicherheitsnetz)
       }, { threshold: 0 }).observe(sentinel);
     }
 
@@ -165,29 +170,23 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
 
     const covering = new Set();
     let coverObs = null;
-    const applyHidden = () => nav.classList.toggle('nav2--hidden', covering.size > 0);
+    // Ausgeblendet, wenn ein vollbreites Bild das Band schneidet — ABER nie am
+    // absoluten Seitenende (atEnd): dort bleibt die Nav sichtbar (Sicherheitsnetz).
+    const applyHidden = () => nav.classList.toggle('nav2--hidden', covering.size > 0 && !atEnd);
 
-    const BUF = 32;
     const buildCover = () => {
       if (coverObs) coverObs.disconnect();
       covering.clear();
+      if (!coverers.length) { applyHidden(); return; }
+      // ALLE vollbreiten Bilder (imageFull + imagePair) lösen aus. Der Seitenende-
+      // Sonderfall (letztes Bild reicht bis zum Footer -> ließe sich nicht wegscrollen)
+      // wird NICHT über Ausschluss gelöst, sondern über das atEnd-Netz in applyHidden:
+      // am absoluten Seitenende bleibt die Nav sichtbar, sonst hinge sie fest.
+      // Band = Nav-Bereich (64 .. 64 + Nav-Höhe), oben UND unten um NAV_HIDE_BUFFER
+      // erweitert: ausblenden schon davor, einblenden erst danach.
       const navH = nav.offsetHeight || 0;
-      // Sonderfall Seitenende: Ein vollbreites Bild blendet die Nav NUR aus, wenn es
-      // sich über die Nav-Linie hinwegscrollen lässt (danach kommt Inhalt). Reicht
-      // das Bild bis ans Seitenende (Unterkante am Max-Scroll noch UNTER der
-      // Band-Oberkante 32px), gibt es kein "Bild vorbei"-Ereignis -> nicht beobachten,
-      // sonst hängt die Nav am Seitenende hinter dem Bild fest. So bleibt sie dort sichtbar.
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const active = coverers.filter((c) => {
-        const docBottom = c.getBoundingClientRect().bottom + window.scrollY;
-        return docBottom - maxScroll <= STICK - BUF; // Bild kann über die Band-Oberkante gescrollt werden
-      });
-      if (!active.length) { applyHidden(); return; }
-      // Band = vertikaler Bereich der sticky Nav2 (64 .. 64 + Nav-Höhe), oben UND
-      // unten um 32px Puffer erweitert: ausblenden schon 32px vor Bildkontakt,
-      // einblenden erst 32px nachdem das Bild den Bereich verlassen hat.
-      const top = Math.max(0, STICK - BUF);
-      const bottom = Math.max(0, window.innerHeight - STICK - navH - BUF);
+      const top = Math.max(0, STICK - NAV_HIDE_BUFFER);
+      const bottom = Math.max(0, window.innerHeight - STICK - navH - NAV_HIDE_BUFFER);
       coverObs = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) covering.add(entry.target);
@@ -195,7 +194,7 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
         }
         applyHidden();
       }, { rootMargin: `-${top}px 0px -${bottom}px 0px`, threshold: 0 });
-      for (const c of active) coverObs.observe(c);
+      for (const c of coverers) coverObs.observe(c);
     };
     buildCover();
 

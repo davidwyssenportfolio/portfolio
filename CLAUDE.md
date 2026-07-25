@@ -158,14 +158,15 @@ Scrollspy setzt `is-active` (IntersectionObserver, dünnes Band auf 64px). Aktiv
 unterste Section, die das Band schneidet; `recompute()` läuft bei jedem Callback (kein
 Race mit dem Seitenende), leeres Band (Bild-Lücke) behält die vorherige Markierung.
 `#nav2-end-sentinel` aktiviert am Seitenende den letzten Anker. Zusätzlich blendet Nav2
-aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band durchläuft — mit **32px-
-Puffer** oben/unten (blendet 32px vor Kontakt aus, 32px nach Verlassen ein). Auslöser
-über Klasse/Struktur (`.content > figure.image-card` = imageFull, `.content >
-.image-row-half` = imagePair), NICHT `.image-row` (imageColumn). **Seitenende-Sonderfall:**
-Ein vollbreites Bild, das bis ans Seitenende reicht (Unterkante am Max-Scroll noch unter
-der Band-Oberkante, also nicht über die Nav-Linie hinwegscrollbar), wird NICHT beobachtet
-— sonst hinge die Nav dahinter fest; so bleibt sie am Seitenende sichtbar. Unter 992px ist
-die Rail per CSS aus; das Script bleibt fehlerfrei.
+aus (`.nav2--hidden`), wenn ein VOLLBREITES Bild das Nav-Band durchläuft. Auslöser rein
+über Klasse/Struktur: **ALLE** vollbreiten Typen — `.content > figure.image-card` (imageFull)
+UND `.content > .image-row-half` (imagePair) — lösen aus, NICHT das eingerückte
+`.content > .image-row` (imageColumn, beginnt weiter rechts, überlappt die Rail nicht).
+Der Vorlauf ist eine Konstante `NAV_HIDE_BUFFER` oben im Script (aktuell 64px): blendet
+so viel vor Bildkontakt aus und nach Verlassen wieder ein (Band-rootMargin oben/unten
+erweitert). **Seitenende:** Am absoluten Seitenende (`atEnd` via Sentinel) bleibt die Nav
+sichtbar (`applyHidden` respektiert `!atEnd`) — sonst hinge sie hinter einem bis zum Footer
+reichenden Bild fest. Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei.
 
 Schema in `src/content.config.ts` (zod, Diskriminante `discriminant`). Fehlende
 Pflichtfelder brechen den Build ab, das ist Absicht.
