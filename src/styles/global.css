@@ -115,6 +115,10 @@ ul, ol { padding-left: 1.2em; }
 .section-content > * + h3,
 .section-content > * + .list-block,
 .section-content > * + .section-header { margin-top: var(--spacing-024); }
+/* Ausnahme: H3 direkt nach dem Section Header steht bei 16 (nicht 24).
+   Höhere Spezifität (0,2,1) + spätere Position -> gewinnt gegen die Sammelregel.
+   Ein H3 mitten im Text (Absatz -> H3, neues Topic) bleibt bei 24. */
+.section-content > .section-header + h3 { margin-top: var(--spacing-016); }
 .section-content h3 + p { margin-top: var(--spacing-012); } /* H3-Block intern */
 .section-content h3 + .body-block { margin-top: var(--spacing-012); } /* Body Block im H3-Block */
 

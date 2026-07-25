@@ -107,7 +107,7 @@ export default config({
             itemLabel: (props) => {
               const v: any = props.value;
               switch (props.discriminant) {
-                case 'newSection': return `⎯⎯ NEUE SECTION  (#${v.fields.anchor.value || '—'})`;
+                case 'newSection': return `━━━━━━━━━  SECTION:  ${v.fields.anchor.value || '—'}  ━━━━━━━━━`;
                 case 'sectionHeader': return `SECTION HEADER — ${preview(v.fields.title.value)}`;
                 case 'paragraph': return `ABSATZ — ${preview(v.fields.text.value)}`;
                 case 'h3': return `H3 — ${preview(v.fields.title.value)}`;
