@@ -344,11 +344,11 @@ html.cursor-active .cursor.is-ready { opacity: 1; }
 }
 .cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; margin-left: -14px; } /* Blob 28, zentriert */
 .cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; margin-left: 0; } /* Pill 30, linksbündig */
-/* Klick-Feedback: Form auf ABSOLUT 8px verkleinern (schnell, um die Mitte), egal ob
-   aus dem Dot (16 -> scale 0.5) oder aus dem Hover-Blob (28 -> scale 8/28). NICHT beim
+/* Klick-Feedback: Form auf ABSOLUT 12px verkleinern (schnell, um die Mitte), egal ob
+   aus dem Dot (16 -> scale 12/16) oder aus dem Hover-Blob (28 -> scale 12/28). NICHT beim
    Pill (:not(.cursor--pill) -> bleibt beim Klick unverändert). */
-.cursor--press:not(.cursor--pill) .cursor__shape { --cursor-press: 0.5; }         /* Dot 16 -> 8 */
-.cursor--blob.cursor--press .cursor__shape { --cursor-press: calc(8 / 28); }      /* Blob 28 -> 8 */
+.cursor--press:not(.cursor--pill) .cursor__shape { --cursor-press: 0.75; }         /* Dot 16 -> 12 */
+.cursor--blob.cursor--press .cursor__shape { --cursor-press: calc(12 / 28); }      /* Blob 28 -> 12 */
 
 .cursor__label {                                  /* .text-meta-label-Typo, invers */
   font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm);
