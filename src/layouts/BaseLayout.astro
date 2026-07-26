@@ -105,8 +105,13 @@ const fontFace = `
     };
     document.addEventListener('mouseover', (e) => resolve(e.target), { passive: true });
 
-    // Zeiger verlässt Fenster / Fokus weg -> Cursor ausblenden, bis er zurückkommt.
-    const hide = () => { ready = false; root.classList.remove('is-ready'); };
+    // ---- Klick-Feedback: aktive Form beim Drücken kurz verkleinern (CSS scale). ----
+    const press = (on) => root.classList.toggle('cursor--press', on);
+    document.addEventListener('pointerdown', () => press(true), { passive: true });
+    document.addEventListener('pointerup', () => press(false), { passive: true });
+
+    // Zeiger verlässt Fenster / Fokus weg -> Cursor ausblenden + Press zurücksetzen.
+    const hide = () => { ready = false; root.classList.remove('is-ready'); press(false); };
     document.addEventListener('mouseleave', hide);
     window.addEventListener('blur', hide);
   })();

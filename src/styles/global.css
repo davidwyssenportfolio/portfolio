@@ -124,6 +124,10 @@ ul, ol { padding-left: 1.2em; }
      transform: es würde das gemessene Rect verschieben (X-Versatz) und die horizontale
      Cover-Referenz wandern lassen. Nichts hier verändert Layout oder Position. */
 }
+/* Rail-Links auf Textbreite hugen (Flex-Spalte streckt Kinder sonst auf die volle
+   Spalte ~237px): die Hover-Fläche des Custom-Cursor-Blobs entspricht dann dem Text,
+   nicht der leeren Spalte rechts. Klick-Ziel bleibt der Textumfang. */
+.nav2 a { align-self: flex-start; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; } /* Anker-Sprünge ohne Animation; Cover schneidet hart (Script) */
 }
@@ -301,8 +305,11 @@ picture { display: contents; }
    kein reduced-motion). Sonst bleibt der native Cursor.
    ============================================================ */
 .cursor { display: none; }
+/* Nativen Cursor verbergen — auch auf <a>/<button>, die cursor:pointer setzen und
+   sonst ZUSÄTZLICH zum Blob/Pill eine native Hand zeigen würden. Nur bei aktivem
+   Custom Cursor (die Klasse setzt das Script). */
 html.cursor-active,
-html.cursor-active body { cursor: none; }        /* nativen Cursor nur dann verbergen */
+html.cursor-active * { cursor: none !important; }
 html.cursor-active .cursor {
   display: block;
   position: fixed; top: 0; left: 0;
@@ -314,7 +321,14 @@ html.cursor-active .cursor {
 html.cursor-active .cursor.is-ready { opacity: 1; }
 
 .cursor__shape {
-  transform: translate(-50%, -50%);               /* auf dem Zeiger zentriert, wächst symmetrisch */
+  /* LINKE Kante am Zeiger: nur vertikal zentriert (KEIN translateX). Die Breite wächst
+     nach rechts aus dem Punkt heraus -> "Ansehen" läuft nach rechts, der Zeiger bleibt
+     an der linken Kante. translateY(-50%) bleibt als Prozentwert erhalten (used-value),
+     re-löst sich pro Frame gegen die animierende Höhe -> vertikale Mitte immer exakt,
+     ohne dass die Transition darauf feuert. transform-origin left center: Wachstum und
+     Klick-Skalierung gehen vom Zeiger aus. */
+  transform-origin: left center;
+  transform: translateY(-50%) scale(var(--cursor-press, 1));
   box-sizing: border-box;
   display: flex; align-items: center; justify-content: flex-start; /* Label vertikal zentriert, links */
   width: 16px; height: 16px;                      /* Default: Dot 16 */
@@ -323,10 +337,13 @@ html.cursor-active .cursor.is-ready { opacity: 1; }
   opacity: 1;
   overflow: hidden;
   transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
-              padding 0.2s ease-in-out, opacity 0.2s ease-in-out;
+              padding 0.2s ease-in-out, opacity 0.2s ease-in-out,
+              transform 0.1s ease-out;            /* nur der Klick-Scale (scale ändert sich) */
 }
 .cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; } /* Blob 28, 35% */
 .cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; } /* Pill 30, Breite setzt JS */
+/* Klick-Feedback: aktive Form kurz verkleinern (pointerdown -> .cursor--press). */
+.cursor--press .cursor__shape { --cursor-press: 0.75; }
 
 .cursor__label {                                  /* .text-meta-label-Typo, invers */
   font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm);

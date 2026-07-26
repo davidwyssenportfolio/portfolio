@@ -206,7 +206,11 @@ Header, `pointer-events: none` (Klicks gehen hindurch).
 **Position/Form getrennt (Pflicht):** Position-Layer `.cursor` bekommt pro Frame ein
 `transform` per JS, **ohne** CSS-Transition (folgt 1:1). Form-Layer `.cursor__shape`
 morpht per CSS-Transition (`0.2s ease-in-out`, beide Richtungen gleich): Dot↔Blob und
-Pill-Einblenden.
+Pill. **Linkskante am Zeiger:** `.cursor__shape` ist nur vertikal zentriert
+(`translateY(-50%)`, kein `translateX`), `transform-origin: left center` → die Breite
+wächst nach RECHTS aus dem Punkt, der Zeiger bleibt an der linken Kante (Pill läuft nach
+rechts, schrumpft nach links zurück). `translateY(-50%)` bleibt Prozentwert und re-löst
+pro Frame gegen die animierende Höhe (keine Transition darauf).
 
 **Zustände** (delegierter `mouseover` via `closest()`): Default **Dot** (16, primary-900,
 op 1). Über generischem `<a>`/`<button>` OHNE `data-cursor` → **Blob** (28, op 0.35) —
@@ -214,12 +218,18 @@ deckt Logo, Nav, Nav-Rail, In-Text-Links automatisch. Über `[data-cursor]` (Hom
 `data-cursor="case-study" data-cursor-label="Ansehen"`) → **Pill** (Höhe 30, radius 999,
 padding-inline 16, Label `.text-meta-label`-Typo in `--text-inverse`). Pill-Breite VOR
 dem Einblenden per verstecktem `.cursor__measure`-Span (Label + 2×16). Farben immer als
-Token-Var.
+Token-Var. **Klick-Feedback:** `pointerdown` → `.cursor--press` skaliert die Form via
+`--cursor-press: 0.75` (Transition `transform 0.1s`); `pointerup`/Verlassen → zurück.
+
+**Rail-Links** (`.nav2 a { align-self: flex-start }`) hugen die Textbreite, damit der
+Blob nur über dem Text auslöst, nicht in der leeren Spalte (~237px). Klick/Ankersprung
+unverändert.
 
 **Aus** bei Touch (`(hover: hover) and (pointer: fine)` falsch) ODER
 `prefers-reduced-motion: reduce` → nativer Cursor. Nur wenn aktiv, setzt das Script
-`html.cursor-active`; daran hängt `cursor: none`. Abnahme läuft im **echten Browser**
-(In-App-Pane pausiert rAF).
+`html.cursor-active`; daran hängt `cursor: none` — per `html.cursor-active *
+{ cursor: none !important }` AUCH auf `<a>`/`<button>` (die sonst zusätzlich zum Blob die
+native Hand zeigen). Abnahme läuft im **echten Browser** (In-App-Pane pausiert rAF).
 
 **In-Text-Links:** `.section-content a` = `--text-subtle`, Hover `--text-hover`. Footer-
 und Nav-Links haben eigene Farben und liegen nicht in `.section-content`.
