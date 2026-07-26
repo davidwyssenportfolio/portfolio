@@ -196,6 +196,36 @@ gewünschte Sonderzeichen stehen direkt im Text (im Editor eintippen).
 
 ---
 
+## Custom Cursor (site-weit, Markup + Script in `BaseLayout.astro`)
+
+Overlay `.cursor` liegt in `BaseLayout` (Home UND Case-Seiten), NICHT in
+`CaseStudyLayout` (dort sitzt der Nav2-Cover-rAF). Eigener rAF-Loop, **mousemove-
+getrieben**, unabhängig vom Scroll-rAF. `z-index: 9999` über `.nav2-rail` (2) und
+Header, `pointer-events: none` (Klicks gehen hindurch).
+
+**Position/Form getrennt (Pflicht):** Position-Layer `.cursor` bekommt pro Frame ein
+`transform` per JS, **ohne** CSS-Transition (folgt 1:1). Form-Layer `.cursor__shape`
+morpht per CSS-Transition (`0.2s ease-in-out`, beide Richtungen gleich): Dot↔Blob und
+Pill-Einblenden.
+
+**Zustände** (delegierter `mouseover` via `closest()`): Default **Dot** (16, primary-900,
+op 1). Über generischem `<a>`/`<button>` OHNE `data-cursor` → **Blob** (28, op 0.35) —
+deckt Logo, Nav, Nav-Rail, In-Text-Links automatisch. Über `[data-cursor]` (Home-Kacheln
+`data-cursor="case-study" data-cursor-label="Ansehen"`) → **Pill** (Höhe 30, radius 999,
+padding-inline 16, Label `.text-meta-label`-Typo in `--text-inverse`). Pill-Breite VOR
+dem Einblenden per verstecktem `.cursor__measure`-Span (Label + 2×16). Farben immer als
+Token-Var.
+
+**Aus** bei Touch (`(hover: hover) and (pointer: fine)` falsch) ODER
+`prefers-reduced-motion: reduce` → nativer Cursor. Nur wenn aktiv, setzt das Script
+`html.cursor-active`; daran hängt `cursor: none`. Abnahme läuft im **echten Browser**
+(In-App-Pane pausiert rAF).
+
+**In-Text-Links:** `.section-content a` = `--text-subtle`, Hover `--text-hover`. Footer-
+und Nav-Links haben eigene Farben und liegen nicht in `.section-content`.
+
+---
+
 ## Keystatic (lokales CMS)
 
 Editor zum Anlegen/Pflegen der Case Studies: Blöcke per Drag-and-drop sortieren,
@@ -258,8 +288,6 @@ beurteilen, nie auf github.io.
 ## Offene Punkte
 
 - Echter Content statt Platzhalter im Pilot-Case
-- Custom Cursor portieren — Vanilla-Demo existiert: Dot 16px / Blob 28px bei 35%
-  Opazität / Pill mit Label über `data-cursor`-Attribut. Auf Touch deaktivieren.
 - Mobile-Menü (aktuell nur der „Menü"-Trigger)
 - Seiten „Über" und „Kontakt" (Nav-Links zeigen ins Leere)
 - Accent-Farbe — System ist derzeit vollständig monochrom

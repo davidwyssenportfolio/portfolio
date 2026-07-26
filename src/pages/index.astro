@@ -23,7 +23,7 @@ for (let i = 0; i < cases.length; i += 2) rows.push(cases.slice(i, i + 2));
     {rows.map((row) => (
       <div class="home-gallery-row">
         {row.map((c) => (
-          <a class="home-gallery-item" href={url(`work/${c.id}`)} aria-label={c.data.title}>
+          <a class="home-gallery-item" href={url(`work/${c.id}`)} aria-label={c.data.title} data-cursor="case-study" data-cursor-label="Ansehen">
             {(() => {
               const cover = resolveImage(c.data.cover || c.data.heroImage);
               const alt = c.data.coverAlt || c.data.title;

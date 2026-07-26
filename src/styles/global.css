@@ -154,6 +154,11 @@ ul, ol { padding-left: 1.2em; }
 .section-content ol:not([class]) { font-weight: 400; font-size: var(--size-md); line-height: var(--line-height-md); color: var(--text-primary); }
 /* Listenpunkte ohne Zusatzabstand — das Design System definiert nur den
    Abstand Titel→Liste (12). Ein Item-Gap wäre eine Erfindung. */
+/* In-Text-Links im Content: text/subtle als Grundfarbe, text/hover im Hover.
+   Footer- und Nav-Links haben eigene Farben und sind NICHT betroffen (liegen
+   nicht in .section-content). */
+.section-content a { color: var(--text-subtle); }
+.section-content a:hover { color: var(--text-hover); }
 
 /* --- Blöcke --- */
 .section-header { display: flex; flex-direction: column; row-gap: var(--spacing-012); }
@@ -283,4 +288,55 @@ picture { display: contents; }
 /* --- Reduced motion --- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   Custom Cursor (site-weit, Markup + Script in BaseLayout.astro)
+   Trennung Position/Form ist PFLICHT:
+   - .cursor  (Position-Layer): Transform setzt das Script pro Frame, KEINE
+     Transition -> folgt dem Zeiger 1:1 (jede Transition erzeugt Lag).
+   - .cursor__shape (Form-Layer): Transition ease-in-out, in beide Richtungen
+     gleich -> weicher Übergang Dot<->Blob und Pill-Einblenden.
+   Nur aktiv, wenn das Script html.cursor-active setzt (hover + pointer:fine,
+   kein reduced-motion). Sonst bleibt der native Cursor.
+   ============================================================ */
+.cursor { display: none; }
+html.cursor-active,
+html.cursor-active body { cursor: none; }        /* nativen Cursor nur dann verbergen */
+html.cursor-active .cursor {
+  display: block;
+  position: fixed; top: 0; left: 0;
+  z-index: 9999;                                  /* über .nav2-rail (2) und Header */
+  pointer-events: none;                           /* Klicks gehen hindurch */
+  opacity: 0;                                     /* bis zur ersten Mausbewegung unsichtbar */
+  will-change: transform;
+}
+html.cursor-active .cursor.is-ready { opacity: 1; }
+
+.cursor__shape {
+  transform: translate(-50%, -50%);               /* auf dem Zeiger zentriert, wächst symmetrisch */
+  box-sizing: border-box;
+  display: flex; align-items: center; justify-content: flex-start; /* Label vertikal zentriert, links */
+  width: 16px; height: 16px;                      /* Default: Dot 16 */
+  border-radius: 999px;                           /* Dot/Blob rund, Pill voll rund */
+  background: var(--primary-900);
+  opacity: 1;
+  overflow: hidden;
+  transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
+              padding 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+.cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; } /* Blob 28, 35% */
+.cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; } /* Pill 30, Breite setzt JS */
+
+.cursor__label {                                  /* .text-meta-label-Typo, invers */
+  font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm);
+  letter-spacing: 0; color: var(--text-inverse);
+  white-space: nowrap; opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+.cursor--pill .cursor__label { opacity: 1; }
+
+.cursor__measure {                                /* verstecktes Mess-Element für die Pill-Breite */
+  position: absolute; left: -9999px; top: -9999px; visibility: hidden; white-space: nowrap;
+  font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm); letter-spacing: 0;
 }

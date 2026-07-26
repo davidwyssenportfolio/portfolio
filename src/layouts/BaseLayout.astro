@@ -34,5 +34,80 @@ const fontFace = `
   </head>
   <body>
     <slot />
+    {/* Custom-Cursor-Overlay: Position-Layer .cursor (JS-Transform, keine Transition),
+        Form-Layer .cursor__shape (CSS-Transition). Standardmäßig via CSS ausgeblendet,
+        bis das Script html.cursor-active setzt. */}
+    <div class="cursor" aria-hidden="true">
+      <div class="cursor__shape"><span class="cursor__label"></span></div>
+    </div>
+    <span class="cursor__measure" aria-hidden="true"></span>
   </body>
 </html>
+
+<script>
+  // Custom Cursor — site-weit (Home UND Case-Seiten), eigener rAF-Loop, mousemove-
+  // getrieben, unabhängig vom Nav2-Cover-Scroll-rAF. Statisch, rein clientseitig.
+  (() => {
+    // Touch / grobes Zeigen ODER reduced-motion: Custom Cursor komplett aus,
+    // nativer Cursor (konsistent zum Nav2-Ansatz reduced-motion = harter Schnitt).
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!canHover.matches || reduce.matches) return;
+
+    const root = document.querySelector('.cursor');
+    const shape = root && root.querySelector('.cursor__shape');
+    const label = root && root.querySelector('.cursor__label');
+    const measure = document.querySelector('.cursor__measure');
+    if (!root || !shape || !label || !measure) return;
+
+    // Nur jetzt den nativen Cursor verbergen (cursor:none hängt an dieser Klasse).
+    document.documentElement.classList.add('cursor-active');
+
+    // Label je data-cursor-Typ (Fallback, falls kein data-cursor-label am Element).
+    const LABELS = { 'case-study': 'Ansehen' };
+
+    let x = 0, y = 0, ticking = false, ready = false, state = 'dot';
+
+    // ---- Position: mousemove speichert, rAF wendet an. KEINE Transition -> 1:1. ----
+    const apply = () => {
+      ticking = false;
+      root.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      if (!ready) { ready = true; root.classList.add('is-ready'); }
+    };
+    window.addEventListener('mousemove', (e) => {
+      x = e.clientX; y = e.clientY;
+      if (!ticking) { ticking = true; requestAnimationFrame(apply); }
+    }, { passive: true });
+
+    // ---- Form/Zustand: delegierter mouseover via closest(). ----
+    const setState = (next, text) => {
+      if (next === state) return;
+      state = next;
+      root.classList.toggle('cursor--blob', next === 'blob');
+      root.classList.toggle('cursor--pill', next === 'pill');
+      if (next === 'pill') {
+        // Pill-Breite VOR dem Einblenden per verstecktem Mess-Element bestimmen
+        // (Mechanismus aus der Demo; Breite = Label + 2×16 padding-inline).
+        measure.textContent = text || '';
+        shape.style.width = (measure.offsetWidth + 32) + 'px';
+        label.textContent = text || '';
+      } else {
+        shape.style.width = '';   // zurück auf die CSS-Breite von Dot/Blob
+        label.textContent = '';
+      }
+    };
+    const resolve = (target) => {
+      if (!(target instanceof Element)) { setState('dot'); return; }
+      const data = target.closest('[data-cursor]');
+      if (data) { setState('pill', data.dataset.cursorLabel || LABELS[data.dataset.cursor] || ''); return; }
+      if (target.closest('a, button')) { setState('blob'); return; }  // Logo, Nav, Nav-Rail, In-Text-Links
+      setState('dot');
+    };
+    document.addEventListener('mouseover', (e) => resolve(e.target), { passive: true });
+
+    // Zeiger verlässt Fenster / Fokus weg -> Cursor ausblenden, bis er zurückkommt.
+    const hide = () => { ready = false; root.classList.remove('is-ready'); };
+    document.addEventListener('mouseleave', hide);
+    window.addEventListener('blur', hide);
+  })();
+</script>
