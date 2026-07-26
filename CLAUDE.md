@@ -159,17 +159,25 @@ unterste Section, die das Band schneidet; `recompute()` läuft bei jedem Callbac
 Race mit dem Seitenende), leeres Band (Bild-Lücke) behält die vorherige Markierung.
 `#nav2-end-sentinel` aktiviert am Seitenende den letzten Anker.
 
-**Ausblenden hinter Bildern (`.nav2--hidden`):** Eine **rAF-gedrosselte Scroll-Schleife**,
-pro Frame SYNCHRON (kein IntersectionObserver → keine IO-Latenz, kein „zu spät"). Rein
-über **Geometrie**, nicht über Bildtypen: Referenz ist die sichtbare sticky `.nav2` (NICHT
-die volle `.nav2-rail`, die absolut über die ganze `.content` spannt). Ein `<img>` in
-`.content` zählt, wenn sein Rect horizontal die Nav-Spalte `[nav.left..nav.right]` schneidet
-UND vertikal in `[nav.top − NAV_HIDE_BUFFER, nav.bottom + NAV_HIDE_BUFFER]` fällt. Eingerückte
-Textspalten-Bilder (beginnen rechts der Nav-Spalte) fallen automatisch raus, neue Bildtypen
-funktionieren automatisch. `NAV_HIDE_BUFFER` ist eine Konstante oben im Script (aktuell 64px)
-= Vorlauf vor Kontakt. **Kein Seitenende-Sonderfall:** überdeckt ein Bild am Ende die Nav,
-ist sie ausgeblendet — das ist der Zweck. Unter 992px ist die Rail per CSS aus; das Script
-bleibt fehlerfrei.
+**Ausblenden hinter Bildern (scroll-gekoppelter Scrub):** Eine **rAF-gedrosselte Scroll-
+Schleife** berechnet die Verdeckung pro Frame direkt aus der Geometrie und setzt `opacity`
+(und `pointer-events`) **inline** — bewusst **KEINE CSS-Transition**. Grund: eine zeitbasierte
+Blende bleibt bei variabler Scroll-Geschwindigkeit nicht synchron (ein 128px-Puffer liefert
+bei 60px/Frame nur ~36ms Vorlauf gegen eine 280ms-Blende → „zu spät"); der Scrub ist per
+Konstruktion synchron, `opacity=0` exakt bei Kontakt, bei jeder Geschwindigkeit.
+
+Horizontale Referenz ist die sichtbare `.nav2` (Spalte 1, L64→R301), **NICHT** die volle
+`.nav2-rail` (die absolut über die ganze `.content`-Breite spannt). **Keine X-Toleranz:**
+zwischen Nav-Rechtskante 301 und dem eingerückten Bild bei L=333 liegen nur **32px** — jedes
+Polster auf der X-Achse hebt die Trennung auf. Puffer wirkt ausschliesslich **vertikal**.
+Verdeckung `h∈[0..1]` = Maximum über alle die Spalte überlappenden `<img>`, `opacity = 1−h`.
+Asymmetrie an der **Kante** (nicht am Zustand → flackerfrei, da ohne `transform` zustands-
+invariant): `NAV_HIDE_BUFFER = 128` am Anflug (unten), `NAV_SHOW_BUFFER = 48` am Abflug (oben)
+→ spätes, unaufdringliches Zurück. Beide Konstanten stehen oben im Script in
+`CaseStudyLayout.astro`. `reduced-motion`: harter Schnitt statt Scrub. **Kein Seitenende-
+Sonderfall:** überdeckt ein Bild am Ende die Nav, ist sie ausgeblendet — das ist der Zweck.
+Unter 992px ist die Rail per CSS aus; das Script bleibt fehlerfrei. Es gibt **keine**
+`.nav2--hidden`-Klasse mehr (Zustand ist die inline gesetzte `opacity`).
 
 Zur Rail-Konstruktion: `.nav2-rail` steht im DOM in der ersten Section, ist aber
 `position:absolute; inset:0` mit `.content` (`position:relative`) als Containing Block —
@@ -217,6 +225,11 @@ Text/Bilder in Formularfeldern. Schreibt direkt die YAML-Dateien im Repo
 - **Autonom arbeiten.** Design-Absicht direkt aus Figma und `design-system.md`
   lesen, statt Rückfragen zu stellen, die aus dem Design beantwortbar sind.
 - **Schreibvorgänge separat verifizieren**, nicht inline im selben Aufruf.
+- **Nav2-Abnahme läuft kontinuierlich, nicht an Festpositionen** (`npm run verify`):
+  50px-Sweep + Frame-für-Frame-Scroll in Chromium UND WebKit (graphcore + pilot), liest
+  den echten `opacity`-Zustand. Eine Festpositions-Messung meldet grün, während der Fehler
+  beim Scrollen sichtbar ist — genau der Irrtum, den `verify.mjs` verhindert. Nie eine
+  zweite, gröbere Messung daneben stehen lassen.
 - **Keine Workarounds**, die eine Token-Bindung aufbrechen. Lieber die saubere
   Lösung, auch wenn sie länger dauert.
 - **Nach Layoutänderungen visuell prüfen**, mindestens 1440 · 992 · 480 gegen

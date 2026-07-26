@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "cms": "KEYSTATIC=1 astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "verify": "node verify.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
