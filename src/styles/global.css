@@ -321,14 +321,16 @@ html.cursor-active .cursor {
 html.cursor-active .cursor.is-ready { opacity: 1; }
 
 .cursor__shape {
-  /* LINKE Kante am Zeiger: nur vertikal zentriert (KEIN translateX). Die Breite wächst
-     nach rechts aus dem Punkt heraus -> "Ansehen" läuft nach rechts, der Zeiger bleibt
-     an der linken Kante. translateY(-50%) bleibt als Prozentwert erhalten (used-value),
-     re-löst sich pro Frame gegen die animierende Höhe -> vertikale Mitte immer exakt,
-     ohne dass die Transition darauf feuert. transform-origin left center: Wachstum und
-     Klick-Skalierung gehen vom Zeiger aus. */
-  transform-origin: left center;
+  /* Horizontale Lage per margin-left (px, ruckelfrei animierbar), NICHT per translateX:
+     Dot/Blob auf dem Zeiger ZENTRIERT (margin-left = -Breite/2), Pill LINKSBÜNDIG
+     (margin-left 0) -> Breite wächst nach rechts aus dem Punkt, "Ansehen" läuft rechts.
+     transform trägt nur die vertikale Zentrierung (translateY(-50%), bleibt Prozentwert
+     und re-löst pro Frame gegen die animierende Höhe) und den Klick-Scale. transform-
+     origin: center -> der Klick-Scale schrumpft SYMMETRISCH um die Mitte, der Punkt
+     bleibt am Zeiger zentriert und springt nicht. */
+  transform-origin: center;
   transform: translateY(-50%) scale(var(--cursor-press, 1));
+  margin-left: -8px;                              /* Dot 16 auf dem Zeiger zentriert */
   box-sizing: border-box;
   display: flex; align-items: center; justify-content: flex-start; /* Label vertikal zentriert, links */
   width: 16px; height: 16px;                      /* Default: Dot 16 */
@@ -336,14 +338,14 @@ html.cursor-active .cursor.is-ready { opacity: 1; }
   background: var(--primary-900);
   opacity: 1;
   overflow: hidden;
-  transition: width 0.2s ease-in-out, height 0.2s ease-in-out,
+  transition: width 0.2s ease-in-out, height 0.2s ease-in-out, margin 0.2s ease-in-out,
               padding 0.2s ease-in-out, opacity 0.2s ease-in-out,
               transform 0.1s ease-out;            /* nur der Klick-Scale (scale ändert sich) */
 }
-.cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; } /* Blob 28, 35% */
-.cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; } /* Pill 30, Breite setzt JS */
-/* Klick-Feedback: aktive Form kurz verkleinern (pointerdown -> .cursor--press). */
-.cursor--press .cursor__shape { --cursor-press: 0.75; }
+.cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; margin-left: -14px; } /* Blob 28, zentriert */
+.cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; margin-left: 0; } /* Pill 30, linksbündig */
+/* Klick-Feedback: Dot 16 -> 8px (scale 0.5), schnell, um die Mitte. */
+.cursor--press .cursor__shape { --cursor-press: 0.5; }
 
 .cursor__label {                                  /* .text-meta-label-Typo, invers */
   font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm);

@@ -206,11 +206,12 @@ Header, `pointer-events: none` (Klicks gehen hindurch).
 **Position/Form getrennt (Pflicht):** Position-Layer `.cursor` bekommt pro Frame ein
 `transform` per JS, **ohne** CSS-Transition (folgt 1:1). Form-Layer `.cursor__shape`
 morpht per CSS-Transition (`0.2s ease-in-out`, beide Richtungen gleich): Dot↔Blob und
-Pill. **Linkskante am Zeiger:** `.cursor__shape` ist nur vertikal zentriert
-(`translateY(-50%)`, kein `translateX`), `transform-origin: left center` → die Breite
-wächst nach RECHTS aus dem Punkt, der Zeiger bleibt an der linken Kante (Pill läuft nach
-rechts, schrumpft nach links zurück). `translateY(-50%)` bleibt Prozentwert und re-löst
-pro Frame gegen die animierende Höhe (keine Transition darauf).
+Pill. **Verankerung per `margin-left` (px, ruckelfrei animierbar — NICHT translateX-
+Prozent):** Dot/Blob sind auf dem Zeiger ZENTRIERT (`margin-left: -Breite/2`, also -8/-14),
+das Pill ist LINKSBÜNDIG (`margin-left: 0`) → seine Breite wächst nach RECHTS aus dem
+Punkt, „Ansehen" läuft rechts raus. `transform` trägt nur die vertikale Zentrierung
+(`translateY(-50%)`, bleibt Prozentwert, re-löst pro Frame gegen die animierende Höhe)
+und den Klick-Scale; `transform-origin: center`.
 
 **Zustände** (delegierter `mouseover` via `closest()`): Default **Dot** (16, primary-900,
 op 1). Über generischem `<a>`/`<button>` OHNE `data-cursor` → **Blob** (28, op 0.35) —
@@ -219,7 +220,9 @@ deckt Logo, Nav, Nav-Rail, In-Text-Links automatisch. Über `[data-cursor]` (Hom
 padding-inline 16, Label `.text-meta-label`-Typo in `--text-inverse`). Pill-Breite VOR
 dem Einblenden per verstecktem `.cursor__measure`-Span (Label + 2×16). Farben immer als
 Token-Var. **Klick-Feedback:** `pointerdown` → `.cursor--press` skaliert die Form via
-`--cursor-press: 0.75` (Transition `transform 0.1s`); `pointerup`/Verlassen → zurück.
+`--cursor-press: 0.5` (Dot 16 → 8px, Transition `transform 0.1s`, `transform-origin:
+center` → schrumpft symmetrisch um die Mitte, springt nicht); `pointerup`/`pointerleave`
+→ zurück.
 
 **Rail-Links** (`.nav2 a { align-self: flex-start }`) hugen die Textbreite, damit der
 Blob nur über dem Text auslöst, nicht in der leeren Spalte (~237px). Klick/Ankersprung

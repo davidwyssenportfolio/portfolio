@@ -108,7 +108,8 @@ const fontFace = `
     // ---- Klick-Feedback: aktive Form beim Drücken kurz verkleinern (CSS scale). ----
     const press = (on) => root.classList.toggle('cursor--press', on);
     document.addEventListener('pointerdown', () => press(true), { passive: true });
-    document.addEventListener('pointerup', () => press(false), { passive: true });
+    // pointerup UND pointerleave (Zeiger verlässt das Fenster) -> zurück; pointercancel als Sicherung.
+    for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) document.addEventListener(ev, () => press(false), { passive: true });
 
     // Zeiger verlässt Fenster / Fokus weg -> Cursor ausblenden + Press zurücksetzen.
     const hide = () => { ready = false; root.classList.remove('is-ready'); press(false); };
