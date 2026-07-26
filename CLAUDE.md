@@ -219,10 +219,11 @@ deckt Logo, Nav, Nav-Rail, In-Text-Links automatisch. Über `[data-cursor]` (Hom
 `data-cursor="case-study" data-cursor-label="Ansehen"`) → **Pill** (Höhe 30, radius 999,
 padding-inline 16, Label `.text-meta-label`-Typo in `--text-inverse`). Pill-Breite VOR
 dem Einblenden per verstecktem `.cursor__measure`-Span (Label + 2×16). Farben immer als
-Token-Var. **Klick-Feedback:** `pointerdown` → `.cursor--press` skaliert die Form via
-`--cursor-press: 0.5` (Dot 16 → 8px, Transition `transform 0.1s`, `transform-origin:
-center` → schrumpft symmetrisch um die Mitte, springt nicht); `pointerup`/`pointerleave`
-→ zurück. **Das Pill skaliert NICHT** (`:not(.cursor--pill)`) — nur Dot/Blob.
+Token-Var. **Größen: 16 (Dot) / 28 (Blob) / 8 (Klick).** **Klick-Feedback:** `pointerdown`
+→ `.cursor--press` skaliert die Form auf ABSOLUT 8px, egal aus welchem Zustand: Dot
+`--cursor-press: 0.5` (16→8), Blob `calc(8/28)` (28→8). Transition `transform 0.1s`,
+`transform-origin: center` (schrumpft symmetrisch um die Mitte, springt nicht);
+`pointerup`/`pointerleave` → zurück. **Das Pill skaliert NICHT** (`:not(.cursor--pill)`).
 
 **Rail-Links** (`.nav2 a { align-self: flex-start }`) hugen die Textbreite, damit der
 Blob nur über dem Text auslöst, nicht in der leeren Spalte (~237px). Klick/Ankersprung
