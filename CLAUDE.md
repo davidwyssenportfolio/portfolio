@@ -222,7 +222,7 @@ dem Einblenden per verstecktem `.cursor__measure`-Span (Label + 2×16). Farben i
 Token-Var. **Klick-Feedback:** `pointerdown` → `.cursor--press` skaliert die Form via
 `--cursor-press: 0.5` (Dot 16 → 8px, Transition `transform 0.1s`, `transform-origin:
 center` → schrumpft symmetrisch um die Mitte, springt nicht); `pointerup`/`pointerleave`
-→ zurück.
+→ zurück. **Das Pill skaliert NICHT** (`:not(.cursor--pill)`) — nur Dot/Blob.
 
 **Rail-Links** (`.nav2 a { align-self: flex-start }`) hugen die Textbreite, damit der
 Blob nur über dem Text auslöst, nicht in der leeren Spalte (~237px). Klick/Ankersprung
