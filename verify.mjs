@@ -59,7 +59,8 @@ async function sweep(step) {
   const nav = document.querySelector('.nav2');
   const rail = document.querySelector('.nav2-rail');
   const content = document.querySelector('.content');
-  const imgs = () => Array.from(content.querySelectorAll('img'));
+  // Wie der Cover-Code: gemessen wird der BLOCK (figure.image-card = Bild + Caption).
+  const blocks = () => { const s = new Set(); for (const im of content.querySelectorAll('img')) s.add(im.closest('figure.image-card') || im); return Array.from(s); };
   const box = (el) => { const r = el.getBoundingClientRect(); return { L: +r.left.toFixed(1), R: +r.right.toFixed(1), T: Math.round(r.top), B: Math.round(r.bottom) }; };
   const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
   const log = [];
@@ -69,41 +70,47 @@ async function sweep(step) {
     await raf(); await sleep(16); await raf(); // Seiten-Scroll-Handler laufen lassen
     const n = box(nav);
     const opacity = +getComputedStyle(nav).opacity;
-    const over = imgs().map((img, i) => {
-      const r = img.getBoundingClientRect();
+    const over = blocks().map((b, i) => {
+      const r = b.getBoundingClientRect();
       if (!r.width || !r.height) return null;
       if (!(r.left < n.R && r.right > n.L)) return null; // nur Nav-Spalte
-      return { i, T: Math.round(r.top), B: Math.round(r.bottom), L: Math.round(r.left), R: Math.round(r.right) };
+      const cap = b.querySelector ? b.querySelector('figcaption') : null;
+      return { i, T: Math.round(r.top), B: Math.round(r.bottom), L: Math.round(r.left), R: Math.round(r.right), caption: !!cap };
     }).filter(Boolean);
     log.push({ y: yy, opacity, hidden: opacity < 0.5, nav: n, rail: box(rail), over });
   }
   return { maxScroll, log };
 }
 
-// ---- In-Browser: kontinuierlicher Fade-Test (opacity bei Erst-Kontakt) ------
+// ---- In-Browser: kontinuierlicher Fade-Test -------------------------------
+// Prüft die ganze Überdeckung, nicht nur den Erst-Kontakt: solange IRGENDEIN Block
+// (figure.image-card, inkl. Caption) die reale Nav-Box überlappt, muss opacity≈0 sein.
+// Erfasst damit beide Seiten — Anflug ("zu spät") UND Abflug (Caption reicht unter das Bild).
 async function fadeScan(pxPerFrame) {
   const raf = () => new Promise((r) => requestAnimationFrame(r));
   document.documentElement.style.scrollBehavior = 'auto';
   const nav = document.querySelector('.nav2');
-  const imgs = Array.from(document.querySelector('.content').querySelectorAll('img'));
+  const content = document.querySelector('.content');
+  const set = new Set();
+  for (const im of content.querySelectorAll('img')) set.add(im.closest('figure.image-card') || im);
+  const blocks = Array.from(set);
   const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
   window.scrollTo(0, 0); await raf();
-  let wasOverlap = false, worst = 0;
-  const events = [];
+  let worst = 0, worstY = null; const events = []; let wasOverlap = false;
   for (let y = 0; y <= maxScroll; y += pxPerFrame) {
     window.scrollTo(0, y); await raf();
     const nb = nav.getBoundingClientRect();
     const op = +getComputedStyle(nav).opacity;
     let overlap = false;
-    for (const img of imgs) {
-      const r = img.getBoundingClientRect();
+    for (const b of blocks) {
+      const r = b.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       if (r.left < nb.right && r.right > nb.left && r.top < nb.bottom && r.bottom > nb.top) { overlap = true; break; }
     }
-    if (overlap && !wasOverlap) { worst = Math.max(worst, op); events.push({ y, op: +op.toFixed(3) }); }
+    if (overlap) { if (op > worst) { worst = op; worstY = y; } if (!wasOverlap) events.push({ y, op: +op.toFixed(3) }); }
     wasOverlap = overlap;
   }
-  return { worst: +worst.toFixed(3), events };
+  return { worst: +worst.toFixed(3), worstY, events };
 }
 
 // ---- Analyse -----------------------------------------------------------------
@@ -191,6 +198,7 @@ async function regression(page, engineFmt) {
 
 // ---- Lauf --------------------------------------------------------------------
 const results = []; // {check, pass, detail}
+const changeLog = []; // {tag, changes} — Zustandswechsel je Engine·Seite für den Bericht
 const ok = (check, pass, detail) => results.push({ check, pass, detail });
 
 const server = startServer();
@@ -209,17 +217,26 @@ try {
       await page.goto(`${ORIGIN}/work/${slug}`, { waitUntil: 'load' });
       await page.waitForTimeout(300);
       const a = analyseSweep(await page.evaluate(sweep, STEP));
+      changeLog.push({ tag, changes: a.changes });
       ok(`${tag} kein Flackern`, a.flicker === null, a.flicker ? `Segment ${a.flicker.gap}px bei y=${a.flicker.at}` : `${a.changes.length} Wechsel, alle Segmente ≥200px`);
       const xp = a.xproof;
       const xOk = xp.navVisible === xp.navHidden && xp.railVisible === xp.railHidden && xp.navVisible !== null && xp.navHidden !== null;
       ok(`${tag} kein X-Versatz`, xOk, `nav ${xp.navVisible}/${xp.navHidden}, rail ${xp.railVisible}/${xp.railHidden}`);
 
-      // Timeliness (beide Geschwindigkeiten)
+      // Timeliness: solange ein Block (inkl. Caption) die Nav-Box überdeckt, opacity≈0.
       for (const spd of SPEEDS) {
         await page.goto(`${ORIGIN}/work/${slug}`, { waitUntil: 'load' });
         await page.waitForTimeout(250);
         const f = await page.evaluate(fadeScan, spd);
-        ok(`${tag} rechtzeitig @${spd}px/f`, f.worst <= 0.05, `max opacity bei Erst-Kontakt ${f.worst}`);
+        ok(`${tag} nie sichtbar über Block @${spd}px/f`, f.worst <= 0.05, `max opacity ${f.worst}${f.worstY != null ? ` @y=${f.worstY}` : ''} solange ein Block die Nav-Box überdeckt`);
+      }
+
+      // Explizit: vollbreiter Block MIT Caption muss die Szene tatsächlich auslösen
+      // (sonst würde die Timeliness-Prüfung ihn nie erreichen). Korrektheit selbst
+      // liegt in der Timeliness-Prüfung oben (Block-Rect inkl. Caption).
+      if (slug === 'pilot') {
+        const cap = a.changes.find((c) => c.to === 'HIDDEN' && c.trigger && c.trigger.caption && c.trigger.R - c.trigger.L > 1000);
+        ok(`${tag} vollbreiter Caption-Block geprüft`, !!cap, cap ? `Block#${cap.trigger.i} [L=${cap.trigger.L} R=${cap.trigger.R}] mit Caption, HIDE @y=${cap.y}` : 'kein vollbreiter Caption-Block im Sweep');
       }
       await page.close();
     }
@@ -244,6 +261,16 @@ try {
 const pass = results.filter((r) => r.pass).length;
 const fail = results.length - pass;
 console.log('\nNav2-Abnahme (kontinuierlich, Chromium + WebKit, graphcore + pilot)\n');
-for (const r of results) console.log(`  ${r.pass ? '✓' : '✗'} ${r.check.padEnd(30)} ${r.detail}`);
+for (const r of results) console.log(`  ${r.pass ? '✓' : '✗'} ${r.check.padEnd(34)} ${r.detail}`);
+
+console.log('\nZustandswechsel (50px-Sweep, auslösender Block):');
+for (const { tag, changes } of changeLog) {
+  const line = changes.map((c) => {
+    const t = c.trigger ? `Block#${c.trigger.i}${c.trigger.caption ? '+Cap' : ''}[T=${c.trigger.T} B=${c.trigger.B}]` : '—';
+    return `y=${c.y}→${c.to}(op${c.opacity}) ${t}`;
+  }).join('  ·  ');
+  console.log(`  ${tag.padEnd(18)} ${line || 'keine'}`);
+}
+
 console.log(`\n${pass}/${results.length} bestanden${fail ? `, ${fail} FEHLGESCHLAGEN` : ''}.`);
 process.exit(fail ? 1 : 0);

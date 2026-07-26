@@ -170,7 +170,10 @@ Horizontale Referenz ist die sichtbare `.nav2` (Spalte 1, L64→R301), **NICHT**
 `.nav2-rail` (die absolut über die ganze `.content`-Breite spannt). **Keine X-Toleranz:**
 zwischen Nav-Rechtskante 301 und dem eingerückten Bild bei L=333 liegen nur **32px** — jedes
 Polster auf der X-Achse hebt die Trennung auf. Puffer wirkt ausschliesslich **vertikal**.
-Verdeckung `h∈[0..1]` = Maximum über alle die Spalte überlappenden `<img>`, `opacity = 1−h`.
+Gemessen wird der **Content-Block** `figure.image-card` (Bild **+ Caption**, gap 16), NICHT
+das `<img>`-Kind — sonst blendet die Nav zu früh wieder ein, während die Caption die Spalte
+noch überdeckt (die Caption reicht ~37px unter das Bild). Verdeckung `h∈[0..1]` = Maximum über
+alle die Spalte überlappenden Blöcke, `opacity = 1−h`.
 Asymmetrie an der **Kante** (nicht am Zustand → flackerfrei, da ohne `transform` zustands-
 invariant): `NAV_HIDE_BUFFER = 128` am Anflug (unten), `NAV_SHOW_BUFFER = 48` am Abflug (oben)
 → spätes, unaufdringliches Zurück. Beide Konstanten stehen oben im Script in

@@ -177,21 +177,28 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     // Toleranz. Eingerückte Bilder (beginnen rechts der Nav-Spalte) fallen automatisch
     // raus; neue Bildtypen funktionieren automatisch. KEIN Seitenende-Sonderfall:
     // überdeckt ein Bild am Ende die Nav, ist sie ausgeblendet — das ist der Zweck.
-    const imageList = () => Array.from(content.querySelectorAll('img'));
-    let coverImgs = imageList();
+    // Gemessen wird der Content-BLOCK (figure.image-card = Bild + Caption, gap 16),
+    // NICHT das <img>-Kind: sonst blendet die Nav zu früh wieder ein, während die
+    // Caption die Spalte noch überdeckt. Ein evtl. ungewrapptes Bild zählt für sich.
+    const coverBlockList = () => {
+      const set = new Set();
+      for (const img of content.querySelectorAll('img')) set.add(img.closest('figure.image-card') || img);
+      return Array.from(set);
+    };
+    let coverBlocks = coverBlockList();
     const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
     let navPE = true; // aktueller pointer-events-Zustand (nur bei Wechsel schreiben)
     const updateCover = () => {
       const n = nav.getBoundingClientRect();
       // Horizontale Referenz: die sichtbare Nav-Spalte (.nav2, L..R), OHNE Toleranz.
       const colLeft = n.left, colRight = n.right;
-      // Verdeckung h in [0..1] = max über alle die Spalte überlappenden Bilder.
-      // Anflug (Bild unter der Nav): h scrubbt 0->1 über die HIDE-Zone.
-      // Abflug (Bild über der Nav):  h scrubbt 1->0 über die kürzere SHOW-Zone.
+      // Verdeckung h in [0..1] = max über alle die Spalte überlappenden Blöcke.
+      // Anflug (Block unter der Nav): h scrubbt 0->1 über die HIDE-Zone.
+      // Abflug (Block über der Nav):  h scrubbt 1->0 über die kürzere SHOW-Zone.
       // Direkte Überlappung der Nav-Box: h=1. Übergänge an beiden Kanten stetig.
       let h = 0;
-      for (const img of coverImgs) {
-        const r = img.getBoundingClientRect();
+      for (const block of coverBlocks) {
+        const r = block.getBoundingClientRect();
         if (!r.width || !r.height) continue;
         if (!(r.left < colRight && r.right > colLeft)) continue; // nur Nav-Spalte
         let hi;
@@ -218,9 +225,9 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     let rt;
     window.addEventListener('resize', () => {
       clearTimeout(rt);
-      rt = setTimeout(() => { buildSpy(); coverImgs = imageList(); updateCover(); }, 150);
+      rt = setTimeout(() => { buildSpy(); coverBlocks = coverBlockList(); updateCover(); }, 150);
     });
-    // Nach vollständigem Laden: Bildliste aktualisieren + Cover neu.
-    window.addEventListener('load', () => { coverImgs = imageList(); updateCover(); });
+    // Nach vollständigem Laden: Blockliste aktualisieren + Cover neu.
+    window.addEventListener('load', () => { coverBlocks = coverBlockList(); updateCover(); });
   })();
 </script>
