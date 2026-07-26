@@ -342,13 +342,13 @@ html.cursor-active .cursor.is-ready { opacity: 1; }
               padding 0.2s ease-in-out, opacity 0.2s ease-in-out,
               transform 0.1s ease-out;            /* nur der Klick-Scale (scale ändert sich) */
 }
-.cursor--blob .cursor__shape { width: 28px; height: 28px; opacity: 0.35; margin-left: -14px; } /* Blob 28, zentriert */
+.cursor--blob .cursor__shape { width: 24px; height: 24px; opacity: 0.35; margin-left: -12px; } /* Blob 24, zentriert */
 .cursor--pill .cursor__shape { height: 30px; padding-inline: 16px; opacity: 1; margin-left: 0; } /* Pill 30, linksbündig */
 /* Klick-Feedback: Form auf ABSOLUT 12px verkleinern (schnell, um die Mitte), egal ob
-   aus dem Dot (16 -> scale 12/16) oder aus dem Hover-Blob (28 -> scale 12/28). NICHT beim
+   aus dem Dot (16 -> scale 12/16) oder aus dem Hover-Blob (24 -> scale 12/24). NICHT beim
    Pill (:not(.cursor--pill) -> bleibt beim Klick unverändert). */
 .cursor--press:not(.cursor--pill) .cursor__shape { --cursor-press: 0.75; }         /* Dot 16 -> 12 */
-.cursor--blob.cursor--press .cursor__shape { --cursor-press: calc(12 / 28); }      /* Blob 28 -> 12 */
+.cursor--blob.cursor--press .cursor__shape { --cursor-press: calc(12 / 24); }      /* Blob 24 -> 12 */
 
 .cursor__label {                                  /* .text-meta-label-Typo, invers */
   font-weight: 400; font-size: var(--size-sm); line-height: var(--line-height-sm);
