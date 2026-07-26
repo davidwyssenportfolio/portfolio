@@ -50,9 +50,10 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
   // Nav2-Verhalten (nur Case-Seiten). Statisch: läuft rein clientseitig.
   //  Teil 1 — Scrollspy: aktiver Anker wandert mit (IntersectionObserver, ⅓-Band),
   //           letzter Anker am Seitenende (Bottom-Sentinel).
-  //  Teil 2 — Nav2 ausblenden, wenn ein VOLLBREITES Bild die Rail überdeckt.
-  //           Auslöser über Blocktyp/Klasse (imageFull = .content > figure.image-card,
-  //           imagePair = .content > .image-row-half); imageColumn (.image-row) NICHT.
+  //  Teil 2 — Nav2 ausblenden, wenn ein Bild die Nav-Spalte überdeckt. Auslöser rein
+  //           GEOMETRISCH (kein Blocktyp/keine Klassenliste): horizontale Überlappung
+  //           mit der sichtbaren Nav-Spalte (.nav2). Eingerückte Bilder (L=333 > 301)
+  //           fallen automatisch raus, neue Bildtypen greifen automatisch.
   (() => {
     const nav = document.querySelector('.nav2');
     const content = document.querySelector('.content');
@@ -68,9 +69,15 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     const STICK = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--spacing-064'), 10) || 64;
     const OFFSET = STICK + 32;
 
-    // Vorlauf, mit dem die Nav vor Bildkontakt aus- und nach Verlassen wieder
-    // einblendet. Bei schnellem Scrollen ggf. erhöhen (z. B. 96). Eine Zahl, eine Stelle.
-    const NAV_HIDE_BUFFER = 64;
+    // Scrub-Zonen der Cover-Blende (NUR vertikal — keine horizontale Toleranz, sonst
+    // kollidiert die Nav-Spalte mit dem nur 32px entfernten eingerückten Bild).
+    // opacity wird pro Frame direkt aus der Distanz Nav<->Bild gescrubbt, statt über
+    // eine zeitbasierte CSS-Transition: Letztere hängt bei schnellem Scrollen hinterher
+    // ("zu spät"), der Scrub ist per Konstruktion synchron (opacity=0 exakt bei Kontakt).
+    // Asymmetrisch: über die HIDE-Zone (Anflug von unten) blendet sie aus, über die
+    // kürzere SHOW-Zone (Abflug nach oben) wieder ein -> spätes, unaufdringliches Zurück.
+    const NAV_HIDE_BUFFER = 128; // Anflug: Distanz, über die ausgeblendet wird
+    const NAV_SHOW_BUFFER = 48;  // Abflug: Distanz, über die wieder eingeblendet wird
 
     // Scrollspy während eines Klick-Sprungs stummschalten, sonst springt die
     // Markierung auf eine durchquerte Section zurück.
@@ -162,28 +169,45 @@ const heroSizes = '(min-width: 1312px) 1184px, (min-width: 768px) calc(100vw - 1
     }
 
     // ---- Teil 2: Nav2 ausblenden, wenn ein vollbreites Bild die Nav-Spalte überdeckt.
-    // rAF-gedrosselte Scroll-Schleife, pro Frame SYNCHRON (kein IntersectionObserver ->
-    // keine IO-Latenz, daher kein "zu spät"). Auslöser rein über GEOMETRIE:
-    //   - Referenz ist die sichtbare sticky Nav (`.nav2`), NICHT die volle Rail.
-    //   - Ein Bild zählt, wenn sein Rect horizontal die Nav-Spalte [nav.left..nav.right]
-    //     schneidet UND vertikal in [nav.top - BUFFER, nav.bottom + BUFFER] fällt.
-    // Eingerückte Textspalten-Bilder (beginnen rechts der Nav-Spalte) fallen automatisch
+    // rAF-gedrosselte Scroll-Schleife, pro Frame SYNCHRON. opacity wird direkt aus der
+    // Scroll-Geometrie GESCRUBBT (kein IntersectionObserver, keine zeitbasierte CSS-
+    // Transition) -> per Konstruktion synchron mit der Scroll-Position, unabhängig von
+    // der Geschwindigkeit (opacity=0 exakt, wenn das Bild die Nav erreicht). Referenz
+    // ist die sichtbare sticky Nav (`.nav2`), NICHT die volle Rail; horizontal ohne
+    // Toleranz. Eingerückte Bilder (beginnen rechts der Nav-Spalte) fallen automatisch
     // raus; neue Bildtypen funktionieren automatisch. KEIN Seitenende-Sonderfall:
     // überdeckt ein Bild am Ende die Nav, ist sie ausgeblendet — das ist der Zweck.
     const imageList = () => Array.from(content.querySelectorAll('img'));
     let coverImgs = imageList();
-    let coverHidden = null;
+    const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+    let navPE = true; // aktueller pointer-events-Zustand (nur bei Wechsel schreiben)
     const updateCover = () => {
       const n = nav.getBoundingClientRect();
+      // Horizontale Referenz: die sichtbare Nav-Spalte (.nav2, L..R), OHNE Toleranz.
       const colLeft = n.left, colRight = n.right;
-      const bandTop = n.top - NAV_HIDE_BUFFER, bandBottom = n.bottom + NAV_HIDE_BUFFER;
-      let hit = false;
+      // Verdeckung h in [0..1] = max über alle die Spalte überlappenden Bilder.
+      // Anflug (Bild unter der Nav): h scrubbt 0->1 über die HIDE-Zone.
+      // Abflug (Bild über der Nav):  h scrubbt 1->0 über die kürzere SHOW-Zone.
+      // Direkte Überlappung der Nav-Box: h=1. Übergänge an beiden Kanten stetig.
+      let h = 0;
       for (const img of coverImgs) {
         const r = img.getBoundingClientRect();
         if (!r.width || !r.height) continue;
-        if (r.left < colRight && r.right > colLeft && r.top < bandBottom && r.bottom > bandTop) { hit = true; break; }
+        if (!(r.left < colRight && r.right > colLeft)) continue; // nur Nav-Spalte
+        let hi;
+        if (r.top >= n.bottom) hi = 1 - (r.top - n.bottom) / NAV_HIDE_BUFFER;      // Anflug
+        else if (r.bottom <= n.top) hi = 1 - (n.top - r.bottom) / NAV_SHOW_BUFFER; // Abflug
+        else hi = 1;                                                              // deckt Nav
+        hi = clamp01(hi);
+        if (hi > h) h = hi;
+        if (h >= 1) break;
       }
-      if (hit !== coverHidden) { coverHidden = hit; nav.classList.toggle('nav2--hidden', hit); }
+      // reduced-motion: harter Schnitt statt weichem Scrub.
+      const opacity = reduce.matches ? (h >= 0.5 ? 0 : 1) : 1 - h;
+      nav.style.opacity = String(opacity);
+      // pointer-events erst kappen, wenn die Nav überwiegend weg ist (nur bei Wechsel).
+      const pe = h < 0.5;
+      if (pe !== navPE) { navPE = pe; nav.style.pointerEvents = pe ? '' : 'none'; }
     };
     let coverTick = false;
     const scheduleCover = () => { if (!coverTick) { coverTick = true; requestAnimationFrame(() => { coverTick = false; updateCover(); }); } };
